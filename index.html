@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Supervisão de Equipamentos</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* === CSS: PALETA CLEAN, CORPORATIVA E ESTRUTURADA === */
+        
+:root {
+            --cor-ouro-corporativo: #F3B723; /* Dourado/Amarelo Mostarda */
+            --cor-azul-acao: #1A54E1; /* Azul Royal vibrante */
+            --cor-azul-escuro: #1E3A8A; /* Azul Médio/Escuro (Cabeçalho e Botões) */
+            
+            --cor-fundo-site: #F4F7FA; /* Fundo geral da página (Cinza/Azul bem claro) */
+            --cor-fundo-card: #FFFFFF; /* Fundo dos painéis (Branco puro) */
+            
+            --cor-texto-principal: #333333; 
+            --cor-texto-label: #1E3A8A; 
+            --cor-borda-sutil: rgba(30, 58, 138, 0.1); 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--cor-fundo-site); 
+            color: var(--cor-texto-principal);
+            margin: 0; 
+            padding: 0; /* Removido para o cabeçalho colar no topo */
+            line-height: 1.6;
+        }
+
+        /* === CABEÇALHO DE DESTAQUE MÁXIMO === */
+        .header-principal {
+            background-color: var(--cor-azul-escuro);
+            color: #FFFFFF;
+            padding: 35px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-bottom: 5px solid var(--cor-ouro-corporativo);
+            margin-bottom: 40px;
+        }
+
+        .header-principal h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container { max-width: 1000px; margin: auto; padding: 0 20px 40px 20px; position: relative; }
+
+        /* Estilo dos Cartões (Cards) */
+        .card { 
+            background-color: var(--cor-fundo-card); 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            margin-bottom: 30px; 
+            border: 1px solid var(--cor-borda-sutil); 
+        }
+
+        h2, h3 { 
+            color: var(--cor-azul-escuro); 
+            margin-top: 0; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--cor-ouro-corporativo); 
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            font-size: 1.3em;
+        }
+
+        .painel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .box-estoque { 
+            background-color: #F8FAFC; 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+            border: 1px solid var(--cor-borda-sutil);
+        }
+        .box-estoque h3 { border-bottom: none; margin-bottom: 10px; color: var(--cor-texto-principal); font-weight: 600; font-size: 1.1em;}
+        .box-estoque strong { color: var(--cor-ouro-corporativo); font-size: 1.8em; font-weight: 800;}
+
+        label { display: block; margin-top: 15px; font-weight: 600; font-size: 14px; color: var(--cor-texto-label); letter-spacing: 0.5px; }
+        
+        /* Inputs */
+        select, input, textarea { 
+            width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #CBD5E1; 
+            border-radius: 6px; box-sizing: border-box; background-color: #FFFFFF;
+            color: var(--cor-texto-principal); font-size: 15px; transition: all 0.2s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none; border-color: var(--cor-azul-acao); box-shadow: 0 0 0 3px rgba(26, 84, 225, 0.1);
+        }
+
+        /* Botões */
+        button { transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+
+        .btn-principal { 
+            background-color: var(--cor-azul-escuro); color: white; cursor: pointer; 
+            margin-top: 25px; border: none; padding: 16px; font-size: 15px; 
+            border-radius: 6px; width: 100%;
+        }
+        .btn-principal:hover { background-color: var(--cor-azul-acao); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(30, 58, 138, 0.2); }
+
+        .btn-secundario { 
+            background-color: transparent; color: var(--cor-ouro-corporativo); cursor: pointer; 
+            margin-top: 20px; border: 2px solid var(--cor-ouro-corporativo); border-radius: 6px;
+            width: 100%; padding: 14px; font-size: 15px;
+        }
+        .btn-secundario:hover { background-color: var(--cor-ouro-corporativo); color: white; }
+
+        .escondido { display: none !important; }
+        
+        .detalhes-box { 
+            background-color: #FFFBEB; padding: 20px; border-left: 4px solid var(--cor-ouro-corporativo); 
+            margin-top: 15px; border-radius: 4px; border: 1px solid #FEF3C7;
+        }
+        
+        /* Histórico */
+        .historico-lista { list-style-type: none; padding: 0; }
+        .historico-item { 
+            background-color: #FFFFFF; margin-bottom: 12px; padding: 20px; 
+            border-left: 5px solid var(--cor-azul-acao); border-radius: 6px; 
+            font-size: 14px; border: 1px solid var(--cor-borda-sutil);
+        }
+        .historico-item:hover { background-color: #F8FAFC; }
+        .historico-data { color: #64748B; font-size: 13px; margin-bottom: 8px; display: block; font-weight: 500;}
+        
+        .btn-desfazer { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: #EF4444; margin-left: 15px; margin-top: -5px; padding: 0;}
+        .btn-editar { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--cor-ouro-corporativo); margin-top: -5px; padding: 0;}
+
+        .dia-resumo { background-color: #F8FAFC; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--cor-borda-sutil); }
+        .dia-resumo h4 { margin: 0 0 15px 0; border-bottom: none; color: var(--cor-azul-escuro); font-size: 1.1em;}
+        .dia-resumo ul { margin: 0; padding-left: 20px; font-size: 14px; }
+        
+        .resultado-pesquisa { background-color: #EFF6FF; padding: 25px; border-left: 5px solid var(--cor-azul-acao); margin-top: 25px; border-radius: 6px;}
+        .resultado-pesquisa h3 { border-bottom: none; margin-bottom: 15px; color: var(--cor-azul-escuro); }
+        .resultado-pesquisa ul { font-size: 15px; line-height: 2.0; list-style-type: none; padding: 0;}
+        .resultado-pesquisa li strong { color: var(--cor-azul-escuro); }
+        
+        .grafico-container { position: relative; height: 400px; width: 100%; margin-top: 20px; background-color: #FFFFFF; padding: 10px; border-radius: 8px; border: 1px solid var(--cor-borda-sutil);}
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+        .modal-box { background-color: var(--cor-fundo-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box h2 { border-bottom: none; text-align: center; margin-bottom: 20px;}
+        .modal-botoes { display: flex; gap: 15px; margin-top: 25px; }
+        .btn-salvar-modal { background-color: var(--cor-azul-escuro); color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
+        .btn-fechar-modal { background-color: #64748B; color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
+
+        .barra-filtro-historico { background-color: #F8FAFC; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--cor-borda-sutil);}
+        .barra-filtro-historico label { margin: 0; }
+        .barra-filtro-historico input { width: auto; margin: 0; padding: 10px;}
+        .btn-limpar { background-color: #E2E8F0; color: var(--cor-texto-principal); padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; width: auto; margin: 0; font-size: 13px;}
+
+        .alerta-modem { background-color: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px; border-radius: 6px; margin-top: 15px; font-weight: bold; text-align: center; font-size: 13px;}
+    </style>
+</head>
+<body>
+
+<header class="header-principal">
+    <h1>Painel de Supervisão de Equipamentos</h1>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>📊 Resumo Geral de Saldos</h2>
+        <div class="painel-grid">
+            <div class="box-estoque">
+                <h3>Total Produzido</h3>
+                <p>Novos: <strong id="totalNovos">0</strong></p>
+                <p>Retrabalhados: <strong id="totalRetrabalhados">0</strong></p>
+            </div>
+            <div class="box-estoque">
+                <h3>Total Enviado</h3>
+                <p>Operação: <strong id="totalOperacao">0</strong></p>
+                <p>Parceira: <strong id="totalParceira">0</strong></p>
+            </div>
+            <div class="box-estoque" style="background-color: #FEF2F2; border-color: #FECACA;">
+                <h3 style="color: #DC2626;">Retorno de Campo</h3>
+                <p>Total Retorno: <strong id="totalRetorno" style="color: #DC2626;">0</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📈 Análise Gráfica de Movimentação</h2>
+        <label>Filtrar Gráfico por Equipamento:</label>
+        <select id="filtroGrafico" onchange="atualizarGrafico()">
+            <option value="TODOS">Todos Misturados</option>
+            <option value="ET">Apenas ET</option>
+            <option value="RT">Apenas RT</option>
+            <option value="CT">Apenas CT</option>
+            <option value="MB">Apenas MB</option>
+            <option value="SENSORES">Apenas SENSORES</option>
+            <option value="ANTENAS">Apenas ANTENAS</option>
+        </select>
+        <div class="grafico-container"><canvas id="meuGraficoCanvas"></canvas></div>
+    </div>
+
+    <div class="card">
+        <h2>🛠️ Registrar Produção (Entrada)</h2>
+        <form id="formProducao">
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataProd" required></div>
+                <div>
+                    <label>Equipamento:</label>
+                    <select id="equipProd" onchange="gerarCampos(this.value, 'Prod')" required>
+                        <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="caixaDetalhesProd" class="detalhes-box escondido"></div>
+            
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                    <label>Estado da Peça:</label>
+                    <select id="estadoProd" onchange="aplicarRegrasET()" required>
+                        <option value="">Selecione...</option><option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>
+                    </select>
+                </div>
+                <div><label>Quantidade:</label><input type="number" id="qtdProd" min="1" value="1" required></div>
+            </div>
+            
+            <label>Observações (Opcional):</label><input type="text" id="obsProd">
+            <button type="submit" class="btn-principal">Salvar Produção na Nuvem</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>🚚 Registrar Envio (Saída)</h2>
+        <form id="formEnvio">
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataEnvio" required></div>
+                <div>
+                    <label>Equipamento:</label>
+                    <select id="equipEnvio" onchange="gerarCampos(this.value, 'Envio')" required>
+                        <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="caixaDetalhesEnvio" class="detalhes-box escondido"></div>
+            
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                    <label>Destino:</label>
+                    <select id="destinoEnvio" required>
+                        <option value="">Selecione...</option><option value="Operação">Operação Interna</option><option value="Parceira">Empresa Parceira</option>
+                    </select>
+                </div>
+                <div><label>Quantidade:</label><input type="number" id="qtdEnvio" min="1" value="1" required></div>
+            </div>
+
+            <label>Observações (Opcional):</label><input type="text" id="obsEnvio">
+            <button type="submit" class="btn-principal">Salvar Envio na Nuvem</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>📥 Registrar Retorno (Campo)</h2>
+        <form id="formRetorno">
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataRetorno" required></div>
+                <div>
+                    <label>Equipamento:</label>
+                    <select id="equipRetorno" onchange="gerarCampos(this.value, 'Retorno')" required>
+                        <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="caixaDetalhesRetorno" class="detalhes-box escondido"></div>
+            
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                    <label>Motivo do Retorno:</label>
+                    <select id="motivoRetorno" required>
+                        <option value="">Selecione...</option><option value="Defeito">Com Defeito</option><option value="Desativação">Desativação de Cliente</option><option value="Manutenção">Preventiva/Recall</option><option value="Não especificado">Não informado</option>
+                    </select>
+                </div>
+                <div><label>Quantidade:</label><input type="number" id="qtdRetorno" min="1" value="1" required></div>
+            </div>
+
+            <label>Observações (Opcional):</label><input type="text" id="obsRetorno">
+            <button type="submit" class="btn-principal" style="background-color: #DC2626;">Registrar Retorno na Nuvem</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>🔍 Consultar Acumulados</h2>
+        <div class="painel-grid">
+            <div><label>Mês/Ano:</label><input type="month" id="filtroMes"></div>
+            <div>
+                <label>Equipamento:</label>
+                <select id="filtroEquip">
+                    <option value="TODOS">Todos</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="realizarPesquisa()" class="btn-secundario">Gerar Relatório em Tela</button>
+        <div id="resultadoPesquisa" class="resultado-pesquisa escondido"></div>
+    </div>
+
+    <div class="card">
+        <h2>📅 Resumo Diário de Produção</h2>
+        <div id="caixaResumoDiario"></div>
+    </div>
+
+    <div class="card">
+        <h2>📝 Histórico de Movimentações</h2>
+        <div class="barra-filtro-historico">
+            <label>Filtrar por Data:</label>
+            <input type="date" id="filtroDataHistorico" onchange="atualizarHistorico()">
+            <button onclick="limparFiltroHistorico()" class="btn-limpar">Limpar Filtro</button>
+        </div>
+        <ul id="listaHistorico" class="historico-lista"></ul>
+    </div>
+
+    <div class="card" style="border-left: 5px solid var(--cor-ouro-corporativo); background-color: #FFFBEB;">
+        <h2>💾 Exportação de Relatório</h2>
+        <button onclick="exportarExcel()" class="btn-principal" style="background-color: var(--cor-ouro-corporativo); color: var(--cor-azul-escuro);">📥 Baixar Planilha Excel (.CSV)</button>
+    </div>
+
+    <div id="modalEdicao" class="modal-overlay escondido">
+        <div class="modal-box">
+            <h2>✏️ Editar Registro</h2>
+            <label>Estado / Destino / Motivo:</label><select id="modalEstadoDestino"></select>
+            <label>Detalhes/Observações:</label><textarea id="modalDetalhes" rows="3"></textarea>
+            <label>Quantidade:</label><input type="number" id="modalQtd" min="1">
+            <div class="modal-botoes">
+                <button onclick="fecharModalEdicao()" class="btn-fechar-modal">Cancelar</button>
+                <button onclick="salvarEdicao()" class="btn-salvar-modal">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* === JAVASCRIPT: FIREBASE E LÓGICA DO SISTEMA === */
+    
+    // =========================================================================
+    // ⚠️ PASSO ÚNICO: COLE AS SUAS CHAVES DO FIREBASE ABAIXO! ⚠️
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "COLE_AQUI",
+      authDomain: "COLE_AQUI",
+      projectId: "COLE_AQUI",
+      storageBucket: "COLE_AQUI",
+      messagingSenderId: "COLE_AQUI",
+      appId: "COLE_AQUI"
+    };
+    // =========================================================================
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let totalNovos = 0, totalRetrabalhados = 0, totalOperacao = 0, totalParceira = 0, totalRetorno = 0;
+    let historico = [];
+    let graficoInstancia = null;
+    let idSendoEditado = null; 
+
+    // OUVINTE EM TEMPO REAL
+    db.collection("registros_equipamentos").onSnapshot((snapshot) => {
+        historico = [];
+        totalNovos = 0; totalRetrabalhados = 0; totalOperacao = 0; totalParceira = 0; totalRetorno = 0;
+
+        snapshot.forEach((doc) => {
+            let item = doc.data(); item.id = doc.id; historico.push(item);
+            if (item.tipo === "Produção") {
+                if (item.destino_estado === "Novo") totalNovos += item.quantidade;
+                if (item.destino_estado === "Retrabalhado") totalRetrabalhados += item.quantidade;
+            } else if (item.tipo === "Envio") {
+                if (item.destino_estado === "Operação") totalOperacao += item.quantidade;
+                if (item.destino_estado === "Parceira") totalParceira += item.quantidade;
+            } else if (item.tipo === "Retorno de Campo") { totalRetorno += item.quantidade; }
+        });
+
+        atualizarPainel(); atualizarHistorico(); atualizarResumoDiario(); atualizarGrafico();
+    });
+
+    // Funções Auxiliares de Data
+    function setarDataDeHoje() {
+        let hoje = new Date(); let ano = hoje.getFullYear(); let mes = String(hoje.getMonth() + 1).padStart(2, '0'); let dia = String(hoje.getDate()).padStart(2, '0');
+        let dataISO = `${ano}-${mes}-${dia}`;
+        document.getElementById('dataProd').value = dataISO; document.getElementById('dataEnvio').value = dataISO; document.getElementById('dataRetorno').value = dataISO;
+    }
+    
+    function formatarDataParaSalvar(dataISO) {
+        let partes = dataISO.split('-'); let dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+        if(dataBR.includes('undefined')) { dataBR = `${new Date(dataISO).toLocaleDateString('pt-BR')}`; }
+        return `${dataBR}, ${new Date().toLocaleTimeString('pt-BR')}`;
+    }
+    
+    function converterDataParaNumero(dataString) {
+        let partes = dataString.split(', '); let dataPartes = partes[0].split('/'); 
+        let horaPartes = [0, 0, 0]; if(partes.length > 1) { horaPartes = partes[1].split(':'); } 
+        return new Date(dataPartes[2], dataPartes[1] - 1, dataPartes[0], horaPartes[0], horaPartes[1] || 0, horaPartes[2] || 0).getTime();
+    }
+
+    // SALVAMENTO NA NUVEM
+    document.getElementById('formProducao').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        let equip = document.getElementById('equipProd').value;
+        let detalhes = coletarTextoDetalhes(equip, 'Prod'); 
+        let obs = document.getElementById('obsProd').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        db.collection("registros_equipamentos").add({ 
+            data: formatarDataParaSalvar(document.getElementById('dataProd').value), 
+            tipo: "Produção", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('estadoProd').value, quantidade: parseInt(document.getElementById('qtdProd').value) 
+        });
+        alert("Produção Salva!"); this.reset(); document.getElementById('caixaDetalhesProd').classList.add('escondido'); setarDataDeHoje();
+    });
+
+    document.getElementById('formEnvio').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        let equip = document.getElementById('equipEnvio').value;
+        let detalhes = coletarTextoDetalhes(equip, 'Envio'); 
+        let obs = document.getElementById('obsEnvio').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        db.collection("registros_equipamentos").add({ 
+            data: formatarDataParaSalvar(document.getElementById('dataEnvio').value), 
+            tipo: "Envio", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('destinoEnvio').value, quantidade: parseInt(document.getElementById('qtdEnvio').value) 
+        });
+        alert("Envio Salvo!"); this.reset(); document.getElementById('caixaDetalhesEnvio').classList.add('escondido'); setarDataDeHoje();
+    });
+
+    document.getElementById('formRetorno').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+        let equip = document.getElementById('equipRetorno').value;
+        let detalhes = coletarTextoDetalhes(equip, 'Retorno'); 
+        let obs = document.getElementById('obsRetorno').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        db.collection("registros_equipamentos").add({ 
+            data: formatarDataParaSalvar(document.getElementById('dataRetorno').value), 
+            tipo: "Retorno de Campo", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('motivoRetorno').value, quantidade: parseInt(document.getElementById('qtdRetorno').value) 
+        });
+        alert("Retorno Salvo!"); this.reset(); document.getElementById('caixaDetalhesRetorno').classList.add('escondido'); setarDataDeHoje();
+    });
+
+    // APAGAR E EDITAR
+    function desfazerRegistro(idFirebase) { 
+        if (!confirm("Tem certeza que deseja APAGAR este registro da Nuvem?")) return;
+        db.collection("registros_equipamentos").doc(idFirebase).delete(); 
+    }
+    
+    function salvarEdicao() {
+        db.collection("registros_equipamentos").doc(idSendoEditado).update({ 
+            quantidade: parseInt(document.getElementById('modalQtd').value), destino_estado: document.getElementById('modalEstadoDestino').value, detalhes: document.getElementById('modalDetalhes').value 
+        });
+        fecharModalEdicao(); alert("Registro Atualizado!");
+    }
+
+    // UI UPDATES
+    function atualizarPainel() {
+        document.getElementById('totalNovos').innerText = totalNovos; document.getElementById('totalRetrabalhados').innerText = totalRetrabalhados;
+        document.getElementById('totalOperacao').innerText = totalOperacao; document.getElementById('totalParceira').innerText = totalParceira; document.getElementById('totalRetorno').innerText = totalRetorno;
+    }
+    
+    function atualizarHistorico() {
+        const lista = document.getElementById('listaHistorico'); lista.innerHTML = ""; 
+        let filtro = document.getElementById('filtroDataHistorico').value; let filtroBR = filtro ? `${filtro.split('-')[2]}/${filtro.split('-')[1]}/${filtro.split('-')[0]}` : "";
+        let ordenado = [...historico].sort((a, b) => converterDataParaNumero(b.data) - converterDataParaNumero(a.data));
+        
+        ordenado.forEach(item => {
+            if (filtroBR && !item.data.startsWith(filtroBR)) return;
+            let cor = item.tipo === "Retorno de Campo" ? "#EF4444" : (item.tipo === "Envio" ? "var(--cor-azul-acao)" : "var(--cor-ouro-corporativo)");
+            lista.innerHTML += `
+                <li class="historico-item" style="border-left-color: ${cor};">
+                    <button class="btn-desfazer" onclick="desfazerRegistro('${item.id}')" title="Apagar">❌</button>
+                    <button class="btn-editar" onclick="abrirModalEdicao('${item.id}')" title="Editar">✏️</button>
+                    <span class="historico-data">${item.data}</span>
+                    <strong>${item.tipo} (${item.quantidade}x ${item.equipamento}):</strong> ${item.detalhes} -> <em style="color: var(--cor-azul-escuro); font-style: normal; font-weight: bold;">${item.destino_estado}</em>
+                </li>`;
+        });
+        if (lista.innerHTML === "") lista.innerHTML = `<li class="historico-item" style="text-align: center; color: #94A3B8; border-left: none;">Nenhum registro encontrado nesta data.</li>`;
+    }
+    
+    function limparFiltroHistorico() { document.getElementById('filtroDataHistorico').value = ""; atualizarHistorico(); }
+    
+    function abrirModalEdicao(idFirebase) {
+        let item = historico.find(i => i.id === idFirebase); if(!item) return; idSendoEditado = idFirebase;
+        document.getElementById('modalQtd').value = item.quantidade; document.getElementById('modalDetalhes').value = item.detalhes;
+        let select = document.getElementById('modalEstadoDestino');
+        if (item.tipo === "Produção") select.innerHTML = '<option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>';
+        else if (item.tipo === "Envio") select.innerHTML = '<option value="Operação">Operação Interna</option><option value="Parceira">Empresa Parceira</option>';
+        else select.innerHTML = '<option value="Defeito">Com Defeito</option><option value="Desativação">Desativação Cliente</option><option value="Manutenção">Preventiva</option><option value="Não especificado">Não informado</option>';
+        select.value = item.destino_estado; document.getElementById('modalEdicao').classList.remove('escondido');
+    }
+    
+    function fecharModalEdicao() { document.getElementById('modalEdicao').classList.add('escondido'); idSendoEditado = null; }
+    
+    function exportarExcel() {
+        if(!confirm("Deseja baixar a planilha com todo o histórico?")) return;
+        let csv = "Data,Tipo Movimentação,Equipamento,Quantidade,Estado/Destino/Motivo,Detalhes\n";
+        let ordenado = [...historico].sort((a, b) => converterDataParaNumero(a.data) - converterDataParaNumero(b.data));
+        ordenado.forEach(item => { csv += `${item.data},${item.tipo},${item.equipamento},${item.quantidade},${item.destino_estado},"${item.detalhes.replace(/"/g, '""')}"\n`; });
+        let blob = new Blob(["\ufeff", csv], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `relatorio_equipamentos_${new Date().toLocaleDateString('pt-BR')}.csv`; link.click();
+    }
+
+    // GRÁFICO
+    function atualizarGrafico() {
+        let equip = document.getElementById('filtroGrafico').value; let mesesSet = new Set(); 
+        historico.forEach(item => { mesesSet.add(item.data.split('/')[1] + '/' + item.data.split('/')[2].split(',')[0]); });
+        let meses = Array.from(mesesSet).sort((a,b) => new Date(a.split('/')[1], a.split('/')[0]-1) - new Date(b.split('/')[1], b.split('/')[0]-1));
+        let dP = [], dE = [], dR = [];
+        
+        meses.forEach(m => {
+            let sP=0, sE=0, sR=0;
+            historico.forEach(i => { if((equip==="TODOS"||i.equipamento===equip) && i.data.includes('/'+m)){ if(i.tipo==="Produção") sP+=i.quantidade; if(i.tipo==="Envio") sE+=i.quantidade; if(i.tipo==="Retorno de Campo") sR+=i.quantidade; }});
+            dP.push(sP); dE.push(sE); dR.push(sR);
+        });
+
+        const ctx = document.getElementById('meuGraficoCanvas').getContext('2d');
+        if (graficoInstancia) graficoInstancia.destroy();
+        
+        Chart.defaults.color = '#64748B';
+        Chart.defaults.font.family = 'Inter';
+
+        graficoInstancia = new Chart(ctx, { 
+            type: 'bar', 
+            data: { labels: meses, datasets: [
+                {label:'Produção', data:dP, backgroundColor:'#F3B723'}, 
+                {label:'Envios', data:dE, backgroundColor:'#1A54E1'}, 
+                {label:'Retornos', data:dR, backgroundColor:'#EF4444'}
+            ]}, 
+            options: {responsive:true, maintainAspectRatio:false, scales: {y: {beginAtZero: true, grid: {color: '#F1F5F9'}}, x: {grid: {display: false}}}}
+        });
+    }
+
+    // RESUMOS E PESQUISA
+    function atualizarResumoDiario() {
+        const div = document.getElementById('caixaResumoDiario'); div.innerHTML = ""; let res = {};
+        historico.forEach(i => { if(i.tipo==="Produção"){ let dBR=i.data.split(',')[0]; if(!res[dBR])res[dBR]={}; if(!res[dBR][i.equipamento])res[dBR][i.equipamento]={N:0,R:0}; if(i.destino_estado==="Novo")res[dBR][i.equipamento].N+=i.quantidade; else res[dBR][i.equipamento].R+=i.quantidade; }});
+        let dias = Object.keys(res).sort((a,b) => converterDataParaNumero(b+', 00:00:00') - converterDataParaNumero(a+', 00:00:00'));
+        if (dias.length === 0) { div.innerHTML = `<p style="text-align: center; color: #94A3B8; padding: 15px;">Nenhuma produção registrada ainda.</p>`; return; }
+        
+        dias.forEach(d => {
+            let h = `<div class="dia-resumo"><h4>Resumo de Produção em ${d}</h4><ul>`;
+            Object.keys(res[d]).sort().forEach(e => { h += `<li><strong>${e}:</strong> ${res[d][e].N} Novos | ${res[d][e].R} Retr.</li>`; });
+            div.innerHTML += h + `</ul></div>`;
+        });
+    }
+    
+    function realizarPesquisa() {
+        let m = document.getElementById('filtroMes').value; let e = document.getElementById('filtroEquip').value;
+        let mF = m ? `/${m.split('-')[1]}/${m.split('-')[0]}` : "";
+        let s = {n:0,r:0,o:0,p:0,ret:0};
+        
+        historico.forEach(i => { if((e==="TODOS"||i.equipamento===e) && (mF===""||i.data.includes(mF))){ if(i.tipo==="Produção"){ if(i.destino_estado==="Novo")s.n+=i.quantidade; else s.r+=i.quantidade;} else if(i.tipo==="Envio"){ if(i.destino_estado==="Operação")s.o+=i.quantidade; else s.p+=i.quantidade;} else s.ret+=i.quantidade; }});
+        
+        document.getElementById('resultadoPesquisa').innerHTML = `
+            <h3>Resultados da Consulta</h3>
+            <ul>
+                <li>🛠️ <strong>Produção (Novos):</strong> ${s.n}</li>
+                <li>🛠️ <strong>Produção (Retrabalhados):</strong> ${s.r}</li>
+                <hr style="border:0;border-top:1px solid #E2E8F0; margin:10px 0;">
+                <li>🚚 <strong>Enviados (Operação):</strong> ${s.o}</li>
+                <li>🚚 <strong>Enviados (Parceira):</strong> ${s.p}</li>
+                <hr style="border:0;border-top:1px solid #E2E8F0; margin:10px 0;">
+                <li>📥 <strong>Total Retorno de Campo:</strong> ${s.ret}</li>
+            </ul>`;
+        document.getElementById('resultadoPesquisa').classList.remove('escondido');
+    }
+
+    // LÓGICA DE DETALHES DINÂMICOS
+    function verificarModemET(sObj, suf) { let a = document.getElementById('avisoModem_'+suf); if(a) { if(sObj.value==="Modem 800C (ANTIGO)" && suf==="Retorno") a.classList.remove('escondido'); else a.classList.add('escondido'); } }
+    
+    function gerarCampos(e, suf) {
+        let c = document.getElementById('caixaDetalhes'+suf); let htmlExtra = "";
+        
+        if(e==="ET") { 
+            htmlExtra = `
+                <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div><label>Modelo:</label><select id="modelo_${suf}"><option>ANATEL (Branco)</option><option>Antigo (Preto)</option></select></div>
+                    <div><label>Lote Original:</label><input type="text" id="lote_${suf}" placeholder="Lote (Obrigatório)" required></div>
+                </div>
+                <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div><label>Caixa:</label><select id="caixa_${suf}"><option>Caixa Nova</option><option>Caixa Antiga/Reutilizada</option></select></div>
+                    <div><label>Versão:</label><select id="versao_${suf}"><option>V1R12</option><option>V1R10</option><option>V1R8</option><option>V1R6</option><option>V1R4</option></select></div>
+                </div>
+                <label>Modem instalado:</label><select id="modem_${suf}" onchange="verificarModemET(this, '${suf}')"><option>Modem A767X</option><option>Modem 7080G</option><option>Modem 800C (ANTIGO)</option></select>
+                <div id="avisoModem_${suf}" class="alerta-modem escondido">⚠️ ATENÇÃO: Requer TROCA DE MODEM obrigatória.</div>`; 
+            if(suf==='Retorno') htmlExtra += `<label>Reset Externo:</label><select id="reset_${suf}"><option>Com botão Reset Externo</option><option>Sem botão Reset Externo</option></select>`; 
+        }
+        else if(e==="SENSORES") htmlExtra = `<div class="painel-grid" style="grid-template-columns: 1fr 1fr;"><div><label>Tipo (Ex: SS):</label><input type="text" id="tipo_${suf}" placeholder="Ex: SS" style="text-transform:uppercase;"></div><div><label>Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select></div></div>`;
+        else if(e==="ANTENAS") htmlExtra = `<label>Tamanho do Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select>`;
+        else if(e==="RT") htmlExtra = `<p style="font-size:13px;color:#64748B;">Sem detalhes adicionais configuráveis.</p>`;
+        else if(e==="CT") htmlExtra = `<label>Modem:</label><select id="modem_${suf}"><option>Modem A767X</option><option>Modem 7080G</option></select>`;
+        else if(e==="MB") htmlExtra = `<label>Hardware Origem:</label><select id="origem_${suf}"><option>China Hardware</option><option>Aqua Hardware</option></select>`;
+        
+        c.innerHTML = htmlExtra; c.classList.toggle('escondido', htmlExtra===""); if(suf==='Prod') aplicarRegrasET();
+    }
+    
+    function aplicarRegrasET() { if(document.getElementById('equipProd').value==="ET" && document.getElementById('estadoProd').value==="Novo" && document.getElementById('versao_Prod')) { document.getElementById('versao_Prod').value="V1R12"; document.getElementById('modem_Prod').value="Modem A767X"; }}
+    
+    function coletarTextoDetalhes(e, suf) {
+        if(e==="ET") return `Mod: ${document.getElementById('modelo_'+suf).value}, Lote: ${document.getElementById('lote_'+suf).value}, Caixa: ${document.getElementById('caixa_'+suf).value}, Ver: ${document.getElementById('versao_'+suf).value}, Modem: ${document.getElementById('modem_'+suf).value}${ (document.getElementById('modem_'+suf).value === 'Modem 800C (ANTIGO)' && suf==='Retorno') ? ' 🔴 TROCAR MODEM OBRIGATÓRIO' : '' }`;
+        if(e==="SENSORES") return `Tipo: ${document.getElementById('tipo_'+suf).value.toUpperCase()}, Cabo: ${document.getElementById('cabo_'+suf).value}`;
+        return "Detalhes padrão.";
+    }
+
+    // Inicialização
+    setarDataDeHoje();
+
+</script>
+</body>
+</html>
