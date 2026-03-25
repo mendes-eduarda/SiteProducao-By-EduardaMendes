@@ -1,5 +1,3 @@
-<!-- CODIGO SITE - PRODUÇÃO - BY_EDUARDA MENDES -->
-<!-- PEGUE SUAS CHAVES DO FIREBASE E FAÇA O SEU -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,170 +5,82 @@
     <title>Painel de Supervisão de Equipamentos</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* :root é a "paleta de tintas". Se quiser mudar a cor do site inteiro, é só trocar aqui! O PINTOR  */
+        html { scroll-behavior: smooth; }
         :root {
-            --cor-ouro-corporativo: #F3B723; /* amarelo */
-            --cor-azul-acao: #1A54E1; /* azul do botao */
-            --cor-azul-escuro: #1E3A8A; /* azul da Diretoria (Cabeçalho e Títulos) */
-            
-            --cor-fundo-site: #F4F7FA; /*  fundo cinza/azul */
-            --cor-fundo-card: #FFFFFF; /*  branco  caixinhas */
-            
-            --cor-texto-principal: #333333; /* cor do texto normal */
-            --cor-texto-label: #1E3A8A; /* cor das perguntas em cima das caixas de texto */
-            --cor-borda-sutil: rgba(30, 58, 138, 0.1); /*  bordinha quase invisível  */
+            --cor-ouro-corporativo: #F3B723; 
+            --cor-azul-acao: #1A54E1; 
+            --cor-azul-escuro: #1E3A8A; 
+            --cor-fundo-site: #F4F7FA; 
+            --cor-fundo-card: #FFFFFF; 
+            --cor-texto-principal: #333333; 
+            --cor-texto-label: #1E3A8A; 
+            --cor-borda-sutil: rgba(30, 58, 138, 0.1); 
         }
 
-        /* Estilo do corpo inteiro da página */
-        body { 
-            font-family: 'Inter', sans-serif; /*  fonte */
-            background-color: var(--cor-fundo-site); /*  parede do fundo */
-            color: var(--cor-texto-principal);
-            margin: 0; 
-            padding: 0; /*  cabeçalho grudar no teto da tela */
-            line-height: 1.6;
-        }
-
-        /*  topo azul grandão com o título do sistema */
-        .header-principal {
-            background-color: var(--cor-azul-escuro);
-            color: #FFFFFF;
-            padding: 35px 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* sombreado  */
-            border-bottom: 5px solid var(--cor-ouro-corporativo); /* linha amarela */
-            margin-bottom: 40px;
-        }
-        .header-principal h1 {
-            margin: 0; font-size: 2.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
-        }
-
-        /*  caixa invisível que segura info. no meio da tela para não esticar demais num monitor gigante */
+        body { font-family: 'Inter', sans-serif; background-color: var(--cor-fundo-site); color: var(--cor-texto-principal); margin: 0; padding: 0; line-height: 1.6; }
+        
+        .header-principal { background-color: var(--cor-azul-escuro); color: #FFFFFF; padding: 35px 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-bottom: 5px solid var(--cor-ouro-corporativo); margin-bottom: 30px; }
+        .header-principal h1 { margin: 0; font-size: 2.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
         .container { max-width: 1000px; margin: auto; padding: 0 20px 40px 20px; position: relative; }
 
-        /*  famosos (Cards) brancos onde a mágica acontece */
-        .card { 
-            background-color: var(--cor-fundo-card); 
-            padding: 30px; 
-            border-radius: 8px; /* Cantinhos arredondados */
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Sombra de leve para parecer que está flutuando */
-            margin-bottom: 30px; 
-            border: 1px solid var(--cor-borda-sutil); 
-        }
+        .menu-ancoras { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 30px; justify-content: center; }
+        .btn-menu { background-color: #FFFFFF; color: var(--cor-azul-escuro); border: 2px solid #E2E8F0; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 13px; text-transform: uppercase; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02); letter-spacing: 0.5px; }
+        .btn-menu:hover { background-color: var(--cor-azul-escuro); color: #FFFFFF; border-color: var(--cor-azul-escuro); transform: translateY(-3px); box-shadow: 0 6px 12px rgba(30, 58, 138, 0.15); }
 
-        /*  títulos (H2 e H3) */
-        h2, h3 { 
-            color: var(--cor-azul-escuro); 
-            margin-top: 0; text-transform: uppercase; letter-spacing: 1px;
-            border-bottom: 2px solid var(--cor-ouro-corporativo); /* Sublinhado dourado */
-            padding-bottom: 10px; margin-bottom: 25px; font-weight: 700; font-size: 1.3em;
-        }
-
-        /*  truque que faz as caixinhas ficarem lado a lado (Grid) */
+        .card { background-color: var(--cor-fundo-card); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid var(--cor-borda-sutil); }
+        h2, h3 { color: var(--cor-azul-escuro); margin-top: 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--cor-ouro-corporativo); padding-bottom: 10px; margin-bottom: 25px; font-weight: 700; font-size: 1.3em; }
         .painel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
-        /*  visual dos bloquinhos de resumo lá no topo (Novos, Operação, etc) */
-        .box-estoque { 
-            background-color: #F8FAFC; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid var(--cor-borda-sutil);
-        }
+        .box-estoque { background-color: #F8FAFC; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid var(--cor-borda-sutil); }
         .box-estoque h3 { border-bottom: none; margin-bottom: 10px; color: var(--cor-texto-principal); font-weight: 600; font-size: 1.1em;}
-        .box-estoque strong { color: var(--cor-ouro-corporativo); font-size: 1.8em; font-weight: 800;} /* O numerozão em destaque */
+        .box-estoque strong { color: var(--cor-ouro-corporativo); font-size: 1.8em; font-weight: 800;}
 
-        /*  textos pequenininhos em cima de onde a gente digita (Data, Quantidade...) */
         label { display: block; margin-top: 15px; font-weight: 600; font-size: 14px; color: var(--cor-texto-label); letter-spacing: 0.5px; }
+        select, input, textarea { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #CBD5E1; border-radius: 6px; box-sizing: border-box; background-color: #FFFFFF; color: var(--cor-texto-principal); font-size: 15px; transition: all 0.2s; }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--cor-azul-acao); box-shadow: 0 0 0 3px rgba(26, 84, 225, 0.1); }
         
-        /* onde a gente digita ou clica (Inputs e Selects) */
-        select, input, textarea { 
-            width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #CBD5E1; 
-            border-radius: 6px; box-sizing: border-box; background-color: #FFFFFF;
-            color: var(--cor-texto-principal); font-size: 15px; transition: all 0.2s; /* A transição faz a animação ser suave */
-        }
-        /*  quando você clica dentro da caixinha para digitar (Foco azulzinho) */
-        select:focus, input:focus, textarea:focus {
-            outline: none; border-color: var(--cor-azul-acao); box-shadow: 0 0 0 3px rgba(26, 84, 225, 0.1);
-        }
-
-        /*  botões  */
         button { transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-
-        /* botão principal (Aquele Azulão que salva as coisas) */
-        .btn-principal { 
-            background-color: var(--cor-azul-escuro); color: white; cursor: pointer; 
-            margin-top: 25px; border: none; padding: 16px; font-size: 15px; border-radius: 6px; width: 100%;
-        }
-        /* mouse passa por cima do botão principal (ele sobe um pouquinho e ganha sombra) */
+        .btn-principal { background-color: var(--cor-azul-escuro); color: white; cursor: pointer; margin-top: 25px; border: none; padding: 16px; font-size: 15px; border-radius: 6px; width: 100%; }
         .btn-principal:hover { background-color: var(--cor-azul-acao); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(30, 58, 138, 0.2); }
-
-        /* botão secundário (Aquele que é só a borda dourada, tipo o de Exportar Excel) */
-        .btn-secundario { 
-            background-color: transparent; color: var(--cor-ouro-corporativo); cursor: pointer; 
-            margin-top: 20px; border: 2px solid var(--cor-ouro-corporativo); border-radius: 6px;
-            width: 100%; padding: 14px; font-size: 15px;
-        }
+        .btn-secundario { background-color: transparent; color: var(--cor-ouro-corporativo); cursor: pointer; margin-top: 20px; border: 2px solid var(--cor-ouro-corporativo); border-radius: 6px; width: 100%; padding: 14px; font-size: 15px; }
         .btn-secundario:hover { background-color: var(--cor-ouro-corporativo); color: white; }
 
-        /*  classe mágica: se você colocar "escondido" em qualquer coisa, ela some da tela! */
         .escondido { display: none !important; }
+        .detalhes-box { background-color: #FFFBEB; padding: 20px; border-left: 4px solid var(--cor-ouro-corporativo); margin-top: 15px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #FEF3C7; }
         
-        /*  caixinha amarela que aparece quando a gente escolhe um equipamento específico */
-        .detalhes-box { 
-            background-color: #FFFBEB; padding: 20px; border-left: 4px solid var(--cor-ouro-corporativo); 
-            margin-top: 15px; border-radius: 4px; border: 1px solid #FEF3C7;
-        }
-        
-        /*  lista do histórico lá embaixo */
         .historico-lista { list-style-type: none; padding: 0; }
-        /* itens do historico */
-        .historico-item { 
-            background-color: #FFFFFF; margin-bottom: 12px; padding: 20px; 
-            border-left: 5px solid var(--cor-azul-acao); border-radius: 6px; 
-            font-size: 14px; border: 1px solid var(--cor-borda-sutil);
-        }
-        .historico-item:hover { background-color: #F8FAFC; } /* Brilho leve ao passar o mouse */
+        .historico-item { background-color: #FFFFFF; margin-bottom: 12px; padding: 20px; border-left: 5px solid var(--cor-azul-acao); border-radius: 6px; font-size: 14px; border: 1px solid var(--cor-borda-sutil); }
+        .historico-item:hover { background-color: #F8FAFC; }
         .historico-data { color: #64748B; font-size: 13px; margin-bottom: 8px; display: block; font-weight: 500;}
-        
-        /* botão de Apagar (X) e Editar (Lápis) no histórico */
         .btn-desfazer { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: #EF4444; margin-left: 15px; margin-top: -5px; padding: 0;}
         .btn-editar { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--cor-ouro-corporativo); margin-top: -5px; padding: 0;}
 
-        /*  caixinha que mostra o resumão de "quantos foram produzidos no dia X" */
         .dia-resumo { background-color: #F8FAFC; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--cor-borda-sutil); }
         .dia-resumo h4 { margin: 0 0 15px 0; border-bottom: none; color: var(--cor-azul-escuro); font-size: 1.1em;}
         .dia-resumo ul { margin: 0; padding-left: 20px; font-size: 14px; }
-        
-        /* onde sai o resultado quando a gente pesquisa acumulados num mês */
         .resultado-pesquisa { background-color: #EFF6FF; padding: 25px; border-left: 5px solid var(--cor-azul-acao); margin-top: 25px; border-radius: 6px;}
         .resultado-pesquisa h3 { border-bottom: none; margin-bottom: 15px; color: var(--cor-azul-escuro); }
         .resultado-pesquisa ul { font-size: 15px; line-height: 2.0; list-style-type: none; padding: 0;}
         .resultado-pesquisa li strong { color: var(--cor-azul-escuro); }
-        
-        /* caixa onde o gráfico de barras mora */
         .grafico-container { position: relative; height: 400px; width: 100%; margin-top: 20px; background-color: #FFFFFF; padding: 10px; border-radius: 8px; border: 1px solid var(--cor-borda-sutil);}
 
-        /* === JANELA POP-UP DE EDIÇÃO (MODAL) === */
-        /*  fundo escuro que tapa a tela toda */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
-        /*  janelinha branca */
         .modal-box { background-color: var(--cor-fundo-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-box h2 { border-bottom: none; text-align: center; margin-bottom: 20px;}
         .modal-botoes { display: flex; gap: 15px; margin-top: 25px; }
         .btn-salvar-modal { background-color: var(--cor-azul-escuro); color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
         .btn-fechar-modal { background-color: #64748B; color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
 
-        /*  barrinha cinza onde fica o filtro de datas do histórico */
         .barra-filtro-historico { background-color: #F8FAFC; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--cor-borda-sutil);}
         .barra-filtro-historico label { margin: 0; }
         .barra-filtro-historico input { width: auto; margin: 0; padding: 10px;}
         .btn-limpar { background-color: #E2E8F0; color: var(--cor-texto-principal); padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; width: auto; margin: 0; font-size: 13px;}
 
-        /* aviso vermelho que criamos pras ETs velhas (Modem 800C) */
         .alerta-modem { background-color: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px; border-radius: 6px; margin-top: 15px; font-weight: bold; text-align: center; font-size: 13px;}
     </style>
 </head>
@@ -182,7 +92,19 @@
 
 <div class="container">
 
-    <div class="card">
+    <div class="menu-ancoras">
+        <a href="#sec-saldos" class="btn-menu">📊 Saldos</a>
+        <a href="#sec-grafico" class="btn-menu">📈 Gráfico</a>
+        <a href="#sec-producao" class="btn-menu">🛠️ Produção</a>
+        <a href="#sec-envio" class="btn-menu">🚚 Envio</a>
+        <a href="#sec-retorno" class="btn-menu">📥 Retorno</a>
+        <a href="#sec-consulta" class="btn-menu">🔍 Consultar</a>
+        <a href="#sec-exportacao" class="btn-menu">💾 Exportar</a>
+        <a href="#sec-resumo" class="btn-menu">📅 Resumo Diário</a>
+        <a href="#sec-historico" class="btn-menu">📝 Histórico</a>
+    </div>
+
+    <div class="card" id="sec-saldos">
         <h2>📊 Resumo Geral de Saldos</h2>
         <div class="painel-grid">
             <div class="box-estoque">
@@ -202,7 +124,7 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-grafico">
         <h2>📈 Análise Gráfica de Movimentação</h2>
         <label>Filtrar Gráfico por Equipamento:</label>
         <select id="filtroGrafico" onchange="atualizarGrafico()">
@@ -217,97 +139,108 @@
         <div class="grafico-container"><canvas id="meuGraficoCanvas"></canvas></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-producao">
         <h2>🛠️ Registrar Produção (Entrada)</h2>
         <form id="formProducao">
             <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Data:</label><input type="date" id="dataProd" required></div>
                 <div>
                     <label>Equipamento:</label>
                     <select id="equipProd" onchange="gerarCampos(this.value, 'Prod')" required>
                         <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
                     </select>
                 </div>
-            </div>
-            
-            <div id="caixaDetalhesProd" class="detalhes-box escondido"></div>
-            
-            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
                 <div>
                     <label>Estado da Peça:</label>
-                    <select id="estadoProd" onchange="aplicarRegrasET()" required>
+                    <select id="estadoProd" onchange="aplicarRegrasET('Prod')" required>
                         <option value="">Selecione...</option><option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>
                     </select>
                 </div>
+            </div>
+
+            <div id="caixaDetalhesProd" class="detalhes-box escondido"></div>
+
+            <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataProd" required></div>
                 <div><label>Quantidade:</label><input type="number" id="qtdProd" min="1" value="1" required></div>
             </div>
-            
             <label>Observações (Opcional):</label><input type="text" id="obsProd">
             <button type="submit" class="btn-principal">Salvar Produção na Nuvem</button>
         </form>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-envio">
         <h2>🚚 Registrar Envio (Saída)</h2>
         <form id="formEnvio">
             <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Data:</label><input type="date" id="dataEnvio" required></div>
                 <div>
                     <label>Equipamento:</label>
                     <select id="equipEnvio" onchange="gerarCampos(this.value, 'Envio')" required>
                         <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
                     </select>
                 </div>
+                <div>
+                    <label>Estado da Peça:</label>
+                    <select id="estadoEnvio" onchange="aplicarRegrasET('Envio')" required>
+                        <option value="">Selecione...</option><option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>
+                    </select>
+                </div>
             </div>
 
             <div id="caixaDetalhesEnvio" class="detalhes-box escondido"></div>
-            
+
             <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataEnvio" required></div>
                 <div>
                     <label>Destino:</label>
                     <select id="destinoEnvio" required>
                         <option value="">Selecione...</option><option value="Operação">Operação Interna</option><option value="Parceira">Empresa Parceira</option>
                     </select>
                 </div>
-                <div><label>Quantidade:</label><input type="number" id="qtdEnvio" min="1" value="1" required></div>
             </div>
-
+            
+            <label>Quantidade Enviada:</label><input type="number" id="qtdEnvio" min="1" value="1" required>
             <label>Observações (Opcional):</label><input type="text" id="obsEnvio">
             <button type="submit" class="btn-principal">Salvar Envio na Nuvem</button>
         </form>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-retorno">
         <h2>📥 Registrar Retorno (Campo)</h2>
         <form id="formRetorno">
             <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Data:</label><input type="date" id="dataRetorno" required></div>
                 <div>
                     <label>Equipamento:</label>
                     <select id="equipRetorno" onchange="gerarCampos(this.value, 'Retorno')" required>
                         <option value="">Selecione...</option><option value="ET">ET</option><option value="RT">RT</option><option value="CT">CT</option><option value="MB">MB</option><option value="SENSORES">SENSORES</option><option value="ANTENAS">ANTENAS</option>
                     </select>
                 </div>
+                <div>
+                    <label>Estado da Peça (Que Retornou):</label>
+                    <select id="estadoRetorno" onchange="aplicarRegrasET('Retorno')" required>
+                        <option value="">Selecione...</option><option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>
+                    </select>
+                </div>
             </div>
 
             <div id="caixaDetalhesRetorno" class="detalhes-box escondido"></div>
-            
+
             <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
+                <div><label>Data:</label><input type="date" id="dataRetorno" required></div>
                 <div>
                     <label>Motivo do Retorno:</label>
                     <select id="motivoRetorno" required>
                         <option value="">Selecione...</option><option value="Defeito">Com Defeito</option><option value="Desativação">Desativação de Cliente</option><option value="Manutenção">Preventiva/Recall</option><option value="Não especificado">Não informado</option>
                     </select>
                 </div>
-                <div><label>Quantidade:</label><input type="number" id="qtdRetorno" min="1" value="1" required></div>
             </div>
-
+            
+            <label>Quantidade que Voltou:</label><input type="number" id="qtdRetorno" min="1" value="1" required>
             <label>Observações (Opcional):</label><input type="text" id="obsRetorno">
             <button type="submit" class="btn-principal" style="background-color: #DC2626;">Registrar Retorno na Nuvem</button>
         </form>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-consulta">
         <h2>🔍 Consultar Acumulados</h2>
         <div class="painel-grid">
             <div><label>Mês/Ano:</label><input type="month" id="filtroMes"></div>
@@ -322,12 +255,17 @@
         <div id="resultadoPesquisa" class="resultado-pesquisa escondido"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-exportacao" style="border-left: 5px solid var(--cor-ouro-corporativo); background-color: #FFFBEB;">
+        <h2>💾 Exportação de Relatório</h2>
+        <button onclick="exportarExcel()" class="btn-principal" style="background-color: var(--cor-ouro-corporativo); color: var(--cor-azul-escuro);">📥 Baixar Planilha Excel (.CSV)</button>
+    </div>
+
+    <div class="card" id="sec-resumo">
         <h2>📅 Resumo Diário de Produção</h2>
         <div id="caixaResumoDiario"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="sec-historico">
         <h2>📝 Histórico de Movimentações</h2>
         <div class="barra-filtro-historico">
             <label>Filtrar por Data:</label>
@@ -335,11 +273,6 @@
             <button onclick="limparFiltroHistorico()" class="btn-limpar">Limpar Filtro</button>
         </div>
         <ul id="listaHistorico" class="historico-lista"></ul>
-    </div>
-
-    <div class="card" style="border-left: 5px solid var(--cor-ouro-corporativo); background-color: #FFFBEB;">
-        <h2>💾 Exportação de Relatório</h2>
-        <button onclick="exportarExcel()" class="btn-principal" style="background-color: var(--cor-ouro-corporativo); color: var(--cor-azul-escuro);">📥 Baixar Planilha Excel (.CSV)</button>
     </div>
 
     <div id="modalEdicao" class="modal-overlay escondido">
@@ -360,8 +293,7 @@
 <script>
     
     // =========================================================================
-    // ⚠️ COLE AS SUAS CHAVES DO FIREBASE ABAIXO! ⚠️
-    // ( é o que liga a sua tela ao servidor do Google para ficar 100% online da nuvem magca)
+    // ⚠️ PASSO ÚNICO: COLE AS SUAS CHAVES DO FIREBASE ABAIXO! ⚠️
     // =========================================================================
     const firebaseConfig = {
       apiKey: "COLE_AQUI",
@@ -373,34 +305,24 @@
     };
     // =========================================================================
 
-    //  o "start" no motor do Firebase e ativando o Banco de Dados (Firestore)
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Criando umas gavetinhas na memória do computador para ir somando as quantidades
     let totalNovos = 0, totalRetrabalhados = 0, totalOperacao = 0, totalParceira = 0, totalRetorno = 0;
-    
-    // lista vazia que vai guardar tudo que baixar da nuvem
-    let historico = [];
-    
-    let graficoInstancia = null; // Guarda o desenho do gráfico
-    let idSendoEditado = null; // Lembra qual pecinha eu cliquei pra editar
+    let historico = []; 
+    let graficoInstancia = null; 
+    let idSendoEditado = null; 
 
-    // 📡 GRANDE FOFOQUEIRO DA NUVEM (onSnapshot)
-    // fica escutando o Firebase 24 horas por dia. Se a Eduarda lá do PC dela salvar algo, 
-    // ele vê na mesma hora e atualiza a tela de quem tiver com o site aberto.
+    // 📡 OUVINTE DA NUVEM 
     db.collection("registros_equipamentos").onSnapshot((snapshot) => {
-        // Zera a conta pra começar a somar tudo de novo fresquinho
         historico = [];
         totalNovos = 0; totalRetrabalhados = 0; totalOperacao = 0; totalParceira = 0; totalRetorno = 0;
 
-        // cada documento/linha que achar na nuvem...
         snapshot.forEach((doc) => {
             let item = doc.data(); 
-            item.id = doc.id; // pega o ID unico dele no Firebase
-            historico.push(item); // joga na nossa lista local
+            item.id = doc.id; 
+            historico.push(item); 
             
-            //  se for produção e for novo, joga na conta de Novos... e por aí vai.
             if (item.tipo === "Produção") {
                 if (item.destino_estado === "Novo") totalNovos += item.quantidade;
                 if (item.destino_estado === "Retrabalhado") totalRetrabalhados += item.quantidade;
@@ -411,45 +333,36 @@
                 totalRetorno += item.quantidade; 
             }
         });
-
-        // terminou de contar? atualiza os números da tela pra gente ver!
         atualizarPainel(); atualizarHistorico(); atualizarResumoDiario(); atualizarGrafico();
     });
 
-    // 📅 FUNÇÕES DE DATA (pra não ficar data americana doida na tela)
     function setarDataDeHoje() {
         let hoje = new Date(); let ano = hoje.getFullYear(); let mes = String(hoje.getMonth() + 1).padStart(2, '0'); let dia = String(hoje.getDate()).padStart(2, '0');
-        let dataISO = `${ano}-${mes}-${dia}`; // Formato AAAA-MM-DD
-        // Pega as 3 caixinhas de data do HTML e joga o dia de hoje nelas
+        let dataISO = `${ano}-${mes}-${dia}`;
         document.getElementById('dataProd').value = dataISO; document.getElementById('dataEnvio').value = dataISO; document.getElementById('dataRetorno').value = dataISO;
     }
     
-    // pega a data AAAA-MM-DD e transforma em DD/MM/AAAA 
     function formatarDataParaSalvar(dataISO) {
         let partes = dataISO.split('-'); let dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
-        // se der algum bug com navegador velho, a gente conserta a força, pega o martelo!
         if(dataBR.includes('undefined')) { dataBR = `${new Date(dataISO).toLocaleDateString('pt-BR')}`; }
-        // junta com a hora que a pessoa clicou em "Salvar"
         return `${dataBR}, ${new Date().toLocaleTimeString('pt-BR')}`;
     }
     
-    //  transforma a data bonitinha num numerozão matemático pra gente conseguir ordenar 
     function converterDataParaNumero(dataString) {
         let partes = dataString.split(', '); let dataPartes = partes[0].split('/'); 
         let horaPartes = [0, 0, 0]; if(partes.length > 1) { horaPartes = partes[1].split(':'); } 
         return new Date(dataPartes[2], dataPartes[1] - 1, dataPartes[0], horaPartes[0], horaPartes[1] || 0, horaPartes[2] || 0).getTime();
     }
 
-    // ☁️ SALVANDO AS COISAS NA NUVEM ☁️
+    // ☁️ SALVANDO NA NUVEM ☁️
     
-    // quando o usuário aperta o botão de Salvar na caixa de "Produção"
+    // Salvar Produção
     document.getElementById('formProducao').addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o site de recarregar a tela e perder tudo, oremos 
+        e.preventDefault(); 
         let equip = document.getElementById('equipProd').value;
-        let detalhes = coletarTextoDetalhes(equip, 'Prod'); // Vai lá ler se a pessoa digitou lote, cabo, etc.
-        let obs = document.getElementById('obsProd').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; } // Se tiver obs, junta no texto
+        let detalhes = coletarTextoDetalhes(equip, 'Prod'); 
+        let obs = document.getElementById('obsProd').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
         
-        // empurra os dados pro Google Firebase (db.collection.add) fazendo a coleta mores
         db.collection("registros_equipamentos").add({ 
             data: formatarDataParaSalvar(document.getElementById('dataProd').value), 
             tipo: "Produção", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('estadoProd').value, quantidade: parseInt(document.getElementById('qtdProd').value) 
@@ -458,12 +371,15 @@
         alert("Produção Salva!"); this.reset(); document.getElementById('caixaDetalhesProd').classList.add('escondido'); setarDataDeHoje();
     });
 
-    // salvar Envio (A mesmíssima coisa do de cima, só muda a "etiqueta" pro Firebase)
+    // Salvar Envio (Grava se a peça enviada era Nova ou Retrabalhada)
     document.getElementById('formEnvio').addEventListener('submit', function(e) {
         e.preventDefault(); 
         let equip = document.getElementById('equipEnvio').value;
-        let detalhes = coletarTextoDetalhes(equip, 'Envio'); 
+        let estadoEnvio = document.getElementById('estadoEnvio').value;
+        
+        let detalhes = `[Peça ${estadoEnvio}] ` + coletarTextoDetalhes(equip, 'Envio'); 
         let obs = document.getElementById('obsEnvio').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        
         db.collection("registros_equipamentos").add({ 
             data: formatarDataParaSalvar(document.getElementById('dataEnvio').value), 
             tipo: "Envio", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('destinoEnvio').value, quantidade: parseInt(document.getElementById('qtdEnvio').value) 
@@ -471,12 +387,15 @@
         alert("Envio Salvo!"); this.reset(); document.getElementById('caixaDetalhesEnvio').classList.add('escondido'); setarDataDeHoje();
     });
 
-    // salvar Retorno
+    // Salvar Retorno (Grava se a peça retornada era Nova ou Retrabalhada)
     document.getElementById('formRetorno').addEventListener('submit', function(e) {
         e.preventDefault(); 
         let equip = document.getElementById('equipRetorno').value;
-        let detalhes = coletarTextoDetalhes(equip, 'Retorno'); 
+        let estadoRetorno = document.getElementById('estadoRetorno').value;
+        
+        let detalhes = `[Peça ${estadoRetorno}] ` + coletarTextoDetalhes(equip, 'Retorno'); 
         let obs = document.getElementById('obsRetorno').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        
         db.collection("registros_equipamentos").add({ 
             data: formatarDataParaSalvar(document.getElementById('dataRetorno').value), 
             tipo: "Retorno de Campo", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('motivoRetorno').value, quantidade: parseInt(document.getElementById('qtdRetorno').value) 
@@ -484,49 +403,32 @@
         alert("Retorno Salvo!"); this.reset(); document.getElementById('caixaDetalhesRetorno').classList.add('escondido'); setarDataDeHoje();
     });
 
-    // 🗑️ APAGAR E EDITAR ✏️
-    
     function desfazerRegistro(idFirebase) { 
-        // pergunta duas vezes se a pessoa não tá doida de apagar algo errado. CALMA, VAMOS TER CALMA!!
         if (!confirm("Tem certeza que deseja APAGAR este registro da Nuvem?")) return;
-        // pega o documento pelo ID dele (idFirebase) e foi de arrasta 
         db.collection("registros_equipamentos").doc(idFirebase).delete(); 
     }
     
     function salvarEdicao() {
-        // Pega o documento pelo ID e manda o comando de UPDATE pro Google
         db.collection("registros_equipamentos").doc(idSendoEditado).update({ 
             quantidade: parseInt(document.getElementById('modalQtd').value), destino_estado: document.getElementById('modalEstadoDestino').value, detalhes: document.getElementById('modalDetalhes').value 
         });
         fecharModalEdicao(); alert("Registro Atualizado!");
     }
 
-    // 🖥️ ATUALIZANDO AS TELINHAS PRO USUÁRIO 🖥️
-    
-    // muda o HTML lá do resumão com os totais de tudo
     function atualizarPainel() {
         document.getElementById('totalNovos').innerText = totalNovos; document.getElementById('totalRetrabalhados').innerText = totalRetrabalhados;
         document.getElementById('totalOperacao').innerText = totalOperacao; document.getElementById('totalParceira').innerText = totalParceira; document.getElementById('totalRetorno').innerText = totalRetorno;
     }
     
-    // Pega a lista invisível que puxamos do Firebase e vomita ela em formato de lista (<li>) na tela
     function atualizarHistorico() {
-        const lista = document.getElementById('listaHistorico'); lista.innerHTML = ""; // LIMPA LIMPA
-        
-        // pega a data da barrinha de filtro pra ver se a gente precisa ignorar alguma coisa
+        const lista = document.getElementById('listaHistorico'); lista.innerHTML = ""; 
         let filtro = document.getElementById('filtroDataHistorico').value; let filtroBR = filtro ? `${filtro.split('-')[2]}/${filtro.split('-')[1]}/${filtro.split('-')[0]}` : "";
-        
-        // coloca o mais recente primeiro, ORDEM!
         let ordenado = [...historico].sort((a, b) => converterDataParaNumero(b.data) - converterDataParaNumero(a.data));
         
         ordenado.forEach(item => {
-            // Se o usuário filtrou pro dia 10 e o item é dia 15, pula fora (return) FILTRO
             if (filtroBR && !item.data.startsWith(filtroBR)) return;
-            
-            // cor  da linha de Retorno, r Envio, DProdução DESIGN PURO
             let cor = item.tipo === "Retorno de Campo" ? "#EF4444" : (item.tipo === "Envio" ? "var(--cor-azul-acao)" : "var(--cor-ouro-corporativo)");
             
-            // desenha o HTML!
             lista.innerHTML += `
                 <li class="historico-item" style="border-left-color: ${cor};">
                     <button class="btn-desfazer" onclick="desfazerRegistro('${item.id}')" title="Apagar">❌</button>
@@ -535,18 +437,16 @@
                     <strong>${item.tipo} (${item.quantidade}x ${item.equipamento}):</strong> ${item.detalhes} -> <em style="color: var(--cor-azul-escuro); font-style: normal; font-weight: bold;">${item.destino_estado}</em>
                 </li>`;
         });
-        // se depois do filtro não sobrar nada na lista
         if (lista.innerHTML === "") lista.innerHTML = `<li class="historico-item" style="text-align: center; color: #94A3B8; border-left: none;">Nenhum registro encontrado nesta data.</li>`;
     }
     
     function limparFiltroHistorico() { document.getElementById('filtroDataHistorico').value = ""; atualizarHistorico(); }
     
-    // clica no lápis: Puxa a janelinha modal, carrega os dados velhos nela pra pessoa arrumar O SUCO DA EDIÇAO
     function abrirModalEdicao(idFirebase) {
         let item = historico.find(i => i.id === idFirebase); if(!item) return; idSendoEditado = idFirebase;
         document.getElementById('modalQtd').value = item.quantidade; document.getElementById('modalDetalhes').value = item.detalhes;
         
-        let select = document.getElementById('modalEstadoDestino'); // Esse select é mutante
+        let select = document.getElementById('modalEstadoDestino'); 
         if (item.tipo === "Produção") select.innerHTML = '<option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>';
         else if (item.tipo === "Envio") select.innerHTML = '<option value="Operação">Operação Interna</option><option value="Parceira">Empresa Parceira</option>';
         else select.innerHTML = '<option value="Defeito">Com Defeito</option><option value="Desativação">Desativação Cliente</option><option value="Manutenção">Preventiva</option><option value="Não especificado">Não informado</option>';
@@ -556,7 +456,6 @@
     
     function fecharModalEdicao() { document.getElementById('modalEdicao').classList.add('escondido'); idSendoEditado = null; }
     
-    // pega lista local, faz virar texto puro separado por vírgula (.CSV) e manda o navegador do cara fazer o download
     function exportarExcel() {
         if(!confirm("Deseja baixar a planilha com todo o histórico?")) return;
         let csv = "Data,Tipo Movimentação,Equipamento,Quantidade,Estado/Destino/Motivo,Detalhes\n";
@@ -566,38 +465,30 @@
         let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `relatorio_equipamentos_${new Date().toLocaleDateString('pt-BR')}.csv`; link.click();
     }
 
-    // 📊 O GRÁFICO (Chart.js fazendo feitiçaria 'uhhhh o fantasminha da prog')
     function atualizarGrafico() {
         let equip = document.getElementById('filtroGrafico').value; let mesesSet = new Set(); 
-        
-        // Pega as datas todas e descobre em quais meses a gente trabalhou (ex: "03/2024")
         historico.forEach(item => { mesesSet.add(item.data.split('/')[1] + '/' + item.data.split('/')[2].split(',')[0]); });
-        //  meses na ordem certa do ano
         let meses = Array.from(mesesSet).sort((a,b) => new Date(a.split('/')[1], a.split('/')[0]-1) - new Date(b.split('/')[1], b.split('/')[0]-1));
         
-        let dP = [], dE = [], dR = []; // 3 sacolas vazias pra guardar a conta da Produção, Envio e Retorno
-        
+        let dP = [], dE = [], dR = []; 
         meses.forEach(m => {
             let sP=0, sE=0, sR=0;
             historico.forEach(i => { 
-                // se a movimentação bate com o mês que tamos conferindo e com o filtro de equipamento... soma!
                 if((equip==="TODOS"||i.equipamento===equip) && i.data.includes('/'+m)){ 
                     if(i.tipo==="Produção") sP+=i.quantidade; 
                     if(i.tipo==="Envio") sE+=i.quantidade; 
                     if(i.tipo==="Retorno de Campo") sR+=i.quantidade; 
                 }
             });
-            dP.push(sP); dE.push(sE); dR.push(sR); // Joga os resultados somados lá nas 3 sacolas
+            dP.push(sP); dE.push(sE); dR.push(sR); 
         });
 
-        // "apaga" a lousa antiga se já tinha um gráfico desenhado
         const ctx = document.getElementById('meuGraficoCanvas').getContext('2d');
         if (graficoInstancia) graficoInstancia.destroy();
         
         Chart.defaults.color = '#64748B';
         Chart.defaults.font.family = 'Inter';
 
-        // pede pra biblioteca desenhar o gráfico com os meses no eixo X e as 3 sacolas no eixo Y
         graficoInstancia = new Chart(ctx, { 
             type: 'bar', 
             data: { labels: meses, datasets: [
@@ -609,19 +500,13 @@
         });
     }
 
-    // 📋 RESUMOS E PESQUISA EXTRA
-    
-    //  bloquinho que agrupa os números de hoje, ontem, etc.
     function atualizarResumoDiario() {
         const div = document.getElementById('caixaResumoDiario'); div.innerHTML = ""; let res = {};
-        
-        // Empacotando e somando os dados por dia (res["23/04/2024"]["ET"]["Novos"])
         historico.forEach(i => { if(i.tipo==="Produção"){ let dBR=i.data.split(',')[0]; if(!res[dBR])res[dBR]={}; if(!res[dBR][i.equipamento])res[dBR][i.equipamento]={N:0,R:0}; if(i.destino_estado==="Novo")res[dBR][i.equipamento].N+=i.quantidade; else res[dBR][i.equipamento].R+=i.quantidade; }});
         
         let dias = Object.keys(res).sort((a,b) => converterDataParaNumero(b+', 00:00:00') - converterDataParaNumero(a+', 00:00:00'));
         if (dias.length === 0) { div.innerHTML = `<p style="text-align: center; color: #94A3B8; padding: 15px;">Nenhuma produção registrada ainda.</p>`; return; }
         
-        // desempacotando e imprimindo na tela
         dias.forEach(d => {
             let h = `<div class="dia-resumo"><h4>Resumo de Produção em ${d}</h4><ul>`;
             Object.keys(res[d]).sort().forEach(e => { h += `<li><strong>${e}:</strong> ${res[d][e].N} Novos | ${res[d][e].R} Retr.</li>`; });
@@ -629,11 +514,10 @@
         });
     }
     
-    // botão "Gerar Relatório em Tela" (Faz quase a mesma coisa que o Painel Geral, mas com base num mês específico)
     function realizarPesquisa() {
         let m = document.getElementById('filtroMes').value; let e = document.getElementById('filtroEquip').value;
         let mF = m ? `/${m.split('-')[1]}/${m.split('-')[0]}` : "";
-        let s = {n:0,r:0,o:0,p:0,ret:0}; // Sacola de somas provisórias
+        let s = {n:0,r:0,o:0,p:0,ret:0}; 
         
         historico.forEach(i => { if((e==="TODOS"||i.equipamento===e) && (mF===""||i.data.includes(mF))){ if(i.tipo==="Produção"){ if(i.destino_estado==="Novo")s.n+=i.quantidade; else s.r+=i.quantidade;} else if(i.tipo==="Envio"){ if(i.destino_estado==="Operação")s.o+=i.quantidade; else s.p+=i.quantidade;} else s.ret+=i.quantidade; }});
         
@@ -648,54 +532,80 @@
                 <hr style="border:0;border-top:1px solid #E2E8F0; margin:10px 0;">
                 <li>📥 <strong>Total Retorno de Campo:</strong> ${s.ret}</li>
             </ul>`;
-        document.getElementById('resultadoPesquisa').classList.remove('escondido'); // Tira a capa da invisibilidade!
+        document.getElementById('resultadoPesquisa').classList.remove('escondido'); 
     }
 
-    // 🔧 LÓGICA DE DETALHES DINÂMICOS (ET tem Lote, Antena tem Cabo...) 🔧
-    
-    // confere se o abençoado do modem 800C foi selecionado e liga o pisca alerta vermelho na tela
+    // 🔧 LÓGICA DE DETALHES E TRAVAS DINÂMICAS 🔧
     function verificarModemET(sObj, suf) { let a = document.getElementById('avisoModem_'+suf); if(a) { if(sObj.value==="Modem 800C (ANTIGO)" && suf==="Retorno") a.classList.remove('escondido'); else a.classList.add('escondido'); } }
     
-    // Essa é a mágica de fazer os campos aparecerem só quando escolhe a peça certa no menu
     function gerarCampos(e, suf) {
         let c = document.getElementById('caixaDetalhes'+suf); let htmlExtra = "";
         
         if(e==="ET") { 
-            // bota o formulário da ET (Lote, Caixa, Versão...)
             htmlExtra = `
                 <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
-                    <div><label>Modelo:</label><select id="modelo_${suf}"><option>ANATEL (Branco)</option><option>Antigo (Preto)</option></select></div>
+                    <div><label>Modelo:</label><select id="modelo_${suf}"><option>ANATEL</option><option>Antigo</option></select></div>
                     <div><label>Lote Original:</label><input type="text" id="lote_${suf}" placeholder="Lote (Obrigatório)" required></div>
                 </div>
                 <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
-                    <div><label>Caixa:</label><select id="caixa_${suf}"><option>Caixa Nova</option><option>Caixa Antiga/Reutilizada</option></select></div>
-                    <div><label>Versão:</label><select id="versao_${suf}"><option>V1R12</option><option>V1R10</option><option>V1R8</option><option>V1R6</option><option>V1R4</option></select></div>
+                    <div><label>Caixa:</label><select id="caixa_${suf}"><option>Caixa Nova</option><option>Caixa Antiga</option></select></div>
+                    <div><label>Versão:</label><select id="versao_${suf}" onchange="aplicarRegrasET('${suf}')"><option>V1R12</option><option>V1R10</option><option>V1R8</option><option>V1R7</option><option>V1R6</option><option>V1R5</option><option>V1R4</option></select></div>
                 </div>
                 <label>Modem instalado:</label><select id="modem_${suf}" onchange="verificarModemET(this, '${suf}')"><option>Modem A767X</option><option>Modem 7080G</option><option>Modem 800C (ANTIGO)</option></select>
                 <div id="avisoModem_${suf}" class="alerta-modem escondido">⚠️ ATENÇÃO: Requer TROCA DE MODEM obrigatória.</div>`; 
-            if(suf==='Retorno') htmlExtra += `<label>Reset Externo:</label><select id="reset_${suf}"><option>Com botão Reset Externo</option><option>Sem botão Reset Externo</option></select>`; 
+            if(suf==='Retorno') htmlExtra += `<label>Reset Externo:</label><select id="reset_${suf}"><option>Com Reset Externo</option><option>Sem Reset Externo</option></select>`; 
         }
-        else if(e==="SENSORES") htmlExtra = `<div class="painel-grid" style="grid-template-columns: 1fr 1fr;"><div><label>Tipo (Ex: SS):</label><input type="text" id="tipo_${suf}" placeholder="Ex: SS" style="text-transform:uppercase;"></div><div><label>Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select></div></div>`;
+        else if(e==="SENSORES") htmlExtra = `<div class="painel-grid" style="grid-template-columns: 1fr 1fr;"><div><label>Tipo do Sensor:</label><select id="tipo_${suf}" required><option value="">Selecione...</option><option value="SS">SS</option><option value="SC">SC</option><option value="SP">SP</option><option value="SV">SV</option><option value="SO">SO</option><option value="SA">SA</option><option value="SU">SU</option><option value="SH">SH</option><option value="SW">SW</option><option value="SE">SE</option><option value="ST">ST</option><option value="SI">SI</option></select></div><div><label>Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select></div></div>`;
         else if(e==="ANTENAS") htmlExtra = `<label>Tamanho do Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select>`;
-        else if(e==="RT") htmlExtra = `<p style="font-size:13px;color:#64748B;">Sem detalhes adicionais configuráveis.</p>`; // RT não enche o saco
+        else if(e==="RT") htmlExtra = `<p style="font-size:13px;color:#64748B;">Sem detalhes adicionais configuráveis.</p>`; 
         else if(e==="CT") htmlExtra = `<label>Modem:</label><select id="modem_${suf}"><option>Modem A767X</option><option>Modem 7080G</option></select>`;
         else if(e==="MB") htmlExtra = `<label>Hardware Origem:</label><select id="origem_${suf}"><option>China Hardware</option><option>Aqua Hardware</option></select>`;
         
-        // joga as caixinhas na tela. E se for Vazio "", ele volta a ficar invisível.
-        c.innerHTML = htmlExtra; c.classList.toggle('escondido', htmlExtra===""); if(suf==='Prod') aplicarRegrasET();
+        c.innerHTML = htmlExtra; c.classList.toggle('escondido', htmlExtra===""); 
+        
+        aplicarRegrasET(suf);
     }
     
-    // se a ET for Nova, a versão TEM que ser a última
-    function aplicarRegrasET() { if(document.getElementById('equipProd').value==="ET" && document.getElementById('estadoProd').value==="Novo" && document.getElementById('versao_Prod')) { document.getElementById('versao_Prod').value="V1R12"; document.getElementById('modem_Prod').value="Modem A767X"; }}
+    // 🧠 O CÉREBRO DA TRAVA DA ET (Agora serve para Prod, Envio e Retorno) 🧠
+    function aplicarRegrasET(suf = 'Prod') { 
+        let equipSelect = document.getElementById('equip' + suf);
+        if (!equipSelect || equipSelect.value !== "ET") return; 
+        
+        let estadoSelect = document.getElementById('estado' + suf);
+        if (!estadoSelect) return; 
+        let estado = estadoSelect.value;
+
+        let versaoSelect = document.getElementById('versao_' + suf);
+        let modemSelect = document.getElementById('modem_' + suf);
+
+        if (!versaoSelect || !modemSelect) return; 
+
+        let currentVersao = versaoSelect.value;
+        let currentModem = modemSelect.value;
+
+        if (estado === "Novo") {
+            versaoSelect.innerHTML = '<option value="V1R12">V1R12</option>';
+            modemSelect.innerHTML = '<option value="Modem A767X">Modem A767X</option>';
+        } 
+        else {
+            versaoSelect.innerHTML = '<option value="V1R12">V1R12</option><option value="V1R10">V1R10</option><option value="V1R8">V1R8</option><option value="V1R7">V1R7</option><option value="V1R6">V1R6</option><option value="V1R5">V1R5</option><option value="V1R4">V1R4</option>';
+            versaoSelect.value = currentVersao || "V1R12";
+
+            if (versaoSelect.value === "V1R12") {
+                modemSelect.innerHTML = '<option value="Modem A767X">Modem A767X</option>';
+            } else {
+                modemSelect.innerHTML = '<option value="Modem A767X">Modem A767X</option><option value="Modem 7080G">Modem 7080G</option><option value="Modem 800C (ANTIGO)">Modem 800C (ANTIGO)</option>';
+                modemSelect.value = currentModem || "Modem A767X";
+            }
+        }
+    }
     
-    // passa a vassoura em todas as caixinhas de detalhes pra juntar numa frase só e mandar pro Google de uma vez
     function coletarTextoDetalhes(e, suf) {
         if(e==="ET") return `Mod: ${document.getElementById('modelo_'+suf).value}, Lote: ${document.getElementById('lote_'+suf).value}, Caixa: ${document.getElementById('caixa_'+suf).value}, Ver: ${document.getElementById('versao_'+suf).value}, Modem: ${document.getElementById('modem_'+suf).value}${ (document.getElementById('modem_'+suf).value === 'Modem 800C (ANTIGO)' && suf==='Retorno') ? ' 🔴 TROCAR MODEM OBRIGATÓRIO' : '' }`;
-        if(e==="SENSORES") return `Tipo: ${document.getElementById('tipo_'+suf).value.toUpperCase()}, Cabo: ${document.getElementById('cabo_'+suf).value}`;
+        if(e==="SENSORES") return `Tipo: ${document.getElementById('tipo_'+suf).value}, Cabo: ${document.getElementById('cabo_'+suf).value}`;
         return "Detalhes padrão.";
     }
 
-    //  tela carregou, ele puxa o calendário pro dia de hoje
     setarDataDeHoje();
 
 </script>
