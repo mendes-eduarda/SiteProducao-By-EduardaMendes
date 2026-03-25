@@ -1,3 +1,5 @@
+<!-- CODIGO SITE - PRODUÇÃO - BY_EDUARDA MENDES -->
+<!-- PEGUE SUAS CHAVES DO FIREBASE E FAÇA O SEU -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,113 +7,108 @@
     <title>Painel de Supervisão de Equipamentos</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
     <style>
-        /* === CSS: PALETA CLEAN, CORPORATIVA E ESTRUTURADA === */
-        
-:root {
-            --cor-ouro-corporativo: #F3B723; /* Dourado/Amarelo Mostarda */
-            --cor-azul-acao: #1A54E1; /* Azul Royal vibrante */
-            --cor-azul-escuro: #1E3A8A; /* Azul Médio/Escuro (Cabeçalho e Botões) */
+        /* :root é a "paleta de tintas". Se quiser mudar a cor do site inteiro, é só trocar aqui! O PINTOR  */
+        :root {
+            --cor-ouro-corporativo: #F3B723; /* amarelo */
+            --cor-azul-acao: #1A54E1; /* azul do botao */
+            --cor-azul-escuro: #1E3A8A; /* azul da Diretoria (Cabeçalho e Títulos) */
             
-            --cor-fundo-site: #F4F7FA; /* Fundo geral da página (Cinza/Azul bem claro) */
-            --cor-fundo-card: #FFFFFF; /* Fundo dos painéis (Branco puro) */
+            --cor-fundo-site: #F4F7FA; /*  fundo cinza/azul */
+            --cor-fundo-card: #FFFFFF; /*  branco  caixinhas */
             
-            --cor-texto-principal: #333333; 
-            --cor-texto-label: #1E3A8A; 
-            --cor-borda-sutil: rgba(30, 58, 138, 0.1); 
+            --cor-texto-principal: #333333; /* cor do texto normal */
+            --cor-texto-label: #1E3A8A; /* cor das perguntas em cima das caixas de texto */
+            --cor-borda-sutil: rgba(30, 58, 138, 0.1); /*  bordinha quase invisível  */
         }
 
+        /* Estilo do corpo inteiro da página */
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--cor-fundo-site); 
+            font-family: 'Inter', sans-serif; /*  fonte */
+            background-color: var(--cor-fundo-site); /*  parede do fundo */
             color: var(--cor-texto-principal);
             margin: 0; 
-            padding: 0; /* Removido para o cabeçalho colar no topo */
+            padding: 0; /*  cabeçalho grudar no teto da tela */
             line-height: 1.6;
         }
 
-        /* === CABEÇALHO DE DESTAQUE MÁXIMO === */
+        /*  topo azul grandão com o título do sistema */
         .header-principal {
             background-color: var(--cor-azul-escuro);
             color: #FFFFFF;
             padding: 35px 20px;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-bottom: 5px solid var(--cor-ouro-corporativo);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* sombreado  */
+            border-bottom: 5px solid var(--cor-ouro-corporativo); /* linha amarela */
             margin-bottom: 40px;
         }
-
         .header-principal h1 {
-            margin: 0;
-            font-size: 2.2em;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin: 0; font-size: 2.2em; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
         }
 
+        /*  caixa invisível que segura info. no meio da tela para não esticar demais num monitor gigante */
         .container { max-width: 1000px; margin: auto; padding: 0 20px 40px 20px; position: relative; }
 
-        /* Estilo dos Cartões (Cards) */
+        /*  famosos (Cards) brancos onde a mágica acontece */
         .card { 
             background-color: var(--cor-fundo-card); 
             padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            border-radius: 8px; /* Cantinhos arredondados */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Sombra de leve para parecer que está flutuando */
             margin-bottom: 30px; 
             border: 1px solid var(--cor-borda-sutil); 
         }
 
+        /*  títulos (H2 e H3) */
         h2, h3 { 
             color: var(--cor-azul-escuro); 
-            margin-top: 0; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--cor-ouro-corporativo); 
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            font-weight: 700;
-            font-size: 1.3em;
+            margin-top: 0; text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 2px solid var(--cor-ouro-corporativo); /* Sublinhado dourado */
+            padding-bottom: 10px; margin-bottom: 25px; font-weight: 700; font-size: 1.3em;
         }
 
+        /*  truque que faz as caixinhas ficarem lado a lado (Grid) */
         .painel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
+        /*  visual dos bloquinhos de resumo lá no topo (Novos, Operação, etc) */
         .box-estoque { 
-            background-color: #F8FAFC; 
-            padding: 20px; 
-            border-radius: 8px; 
-            text-align: center; 
-            border: 1px solid var(--cor-borda-sutil);
+            background-color: #F8FAFC; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid var(--cor-borda-sutil);
         }
         .box-estoque h3 { border-bottom: none; margin-bottom: 10px; color: var(--cor-texto-principal); font-weight: 600; font-size: 1.1em;}
-        .box-estoque strong { color: var(--cor-ouro-corporativo); font-size: 1.8em; font-weight: 800;}
+        .box-estoque strong { color: var(--cor-ouro-corporativo); font-size: 1.8em; font-weight: 800;} /* O numerozão em destaque */
 
+        /*  textos pequenininhos em cima de onde a gente digita (Data, Quantidade...) */
         label { display: block; margin-top: 15px; font-weight: 600; font-size: 14px; color: var(--cor-texto-label); letter-spacing: 0.5px; }
         
-        /* Inputs */
+        /* onde a gente digita ou clica (Inputs e Selects) */
         select, input, textarea { 
             width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #CBD5E1; 
             border-radius: 6px; box-sizing: border-box; background-color: #FFFFFF;
-            color: var(--cor-texto-principal); font-size: 15px; transition: all 0.2s;
+            color: var(--cor-texto-principal); font-size: 15px; transition: all 0.2s; /* A transição faz a animação ser suave */
         }
+        /*  quando você clica dentro da caixinha para digitar (Foco azulzinho) */
         select:focus, input:focus, textarea:focus {
             outline: none; border-color: var(--cor-azul-acao); box-shadow: 0 0 0 3px rgba(26, 84, 225, 0.1);
         }
 
-        /* Botões */
+        /*  botões  */
         button { transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 
+        /* botão principal (Aquele Azulão que salva as coisas) */
         .btn-principal { 
             background-color: var(--cor-azul-escuro); color: white; cursor: pointer; 
-            margin-top: 25px; border: none; padding: 16px; font-size: 15px; 
-            border-radius: 6px; width: 100%;
+            margin-top: 25px; border: none; padding: 16px; font-size: 15px; border-radius: 6px; width: 100%;
         }
+        /* mouse passa por cima do botão principal (ele sobe um pouquinho e ganha sombra) */
         .btn-principal:hover { background-color: var(--cor-azul-acao); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(30, 58, 138, 0.2); }
 
+        /* botão secundário (Aquele que é só a borda dourada, tipo o de Exportar Excel) */
         .btn-secundario { 
             background-color: transparent; color: var(--cor-ouro-corporativo); cursor: pointer; 
             margin-top: 20px; border: 2px solid var(--cor-ouro-corporativo); border-radius: 6px;
@@ -119,50 +116,61 @@
         }
         .btn-secundario:hover { background-color: var(--cor-ouro-corporativo); color: white; }
 
+        /*  classe mágica: se você colocar "escondido" em qualquer coisa, ela some da tela! */
         .escondido { display: none !important; }
         
+        /*  caixinha amarela que aparece quando a gente escolhe um equipamento específico */
         .detalhes-box { 
             background-color: #FFFBEB; padding: 20px; border-left: 4px solid var(--cor-ouro-corporativo); 
             margin-top: 15px; border-radius: 4px; border: 1px solid #FEF3C7;
         }
         
-        /* Histórico */
+        /*  lista do histórico lá embaixo */
         .historico-lista { list-style-type: none; padding: 0; }
+        /* itens do historico */
         .historico-item { 
             background-color: #FFFFFF; margin-bottom: 12px; padding: 20px; 
             border-left: 5px solid var(--cor-azul-acao); border-radius: 6px; 
             font-size: 14px; border: 1px solid var(--cor-borda-sutil);
         }
-        .historico-item:hover { background-color: #F8FAFC; }
+        .historico-item:hover { background-color: #F8FAFC; } /* Brilho leve ao passar o mouse */
         .historico-data { color: #64748B; font-size: 13px; margin-bottom: 8px; display: block; font-weight: 500;}
         
+        /* botão de Apagar (X) e Editar (Lápis) no histórico */
         .btn-desfazer { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: #EF4444; margin-left: 15px; margin-top: -5px; padding: 0;}
         .btn-editar { float: right; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--cor-ouro-corporativo); margin-top: -5px; padding: 0;}
 
+        /*  caixinha que mostra o resumão de "quantos foram produzidos no dia X" */
         .dia-resumo { background-color: #F8FAFC; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--cor-borda-sutil); }
         .dia-resumo h4 { margin: 0 0 15px 0; border-bottom: none; color: var(--cor-azul-escuro); font-size: 1.1em;}
         .dia-resumo ul { margin: 0; padding-left: 20px; font-size: 14px; }
         
+        /* onde sai o resultado quando a gente pesquisa acumulados num mês */
         .resultado-pesquisa { background-color: #EFF6FF; padding: 25px; border-left: 5px solid var(--cor-azul-acao); margin-top: 25px; border-radius: 6px;}
         .resultado-pesquisa h3 { border-bottom: none; margin-bottom: 15px; color: var(--cor-azul-escuro); }
         .resultado-pesquisa ul { font-size: 15px; line-height: 2.0; list-style-type: none; padding: 0;}
         .resultado-pesquisa li strong { color: var(--cor-azul-escuro); }
         
+        /* caixa onde o gráfico de barras mora */
         .grafico-container { position: relative; height: 400px; width: 100%; margin-top: 20px; background-color: #FFFFFF; padding: 10px; border-radius: 8px; border: 1px solid var(--cor-borda-sutil);}
 
-        /* Modal */
+        /* === JANELA POP-UP DE EDIÇÃO (MODAL) === */
+        /*  fundo escuro que tapa a tela toda */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+        /*  janelinha branca */
         .modal-box { background-color: var(--cor-fundo-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-box h2 { border-bottom: none; text-align: center; margin-bottom: 20px;}
         .modal-botoes { display: flex; gap: 15px; margin-top: 25px; }
         .btn-salvar-modal { background-color: var(--cor-azul-escuro); color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
         .btn-fechar-modal { background-color: #64748B; color: white; cursor: pointer; border: none; padding: 12px; flex: 1; border-radius: 6px; font-weight: bold;}
 
+        /*  barrinha cinza onde fica o filtro de datas do histórico */
         .barra-filtro-historico { background-color: #F8FAFC; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--cor-borda-sutil);}
         .barra-filtro-historico label { margin: 0; }
         .barra-filtro-historico input { width: auto; margin: 0; padding: 10px;}
         .btn-limpar { background-color: #E2E8F0; color: var(--cor-texto-principal); padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; width: auto; margin: 0; font-size: 13px;}
 
+        /* aviso vermelho que criamos pras ETs velhas (Modem 800C) */
         .alerta-modem { background-color: #FEF2F2; color: #991B1B; border: 1px solid #F87171; padding: 12px; border-radius: 6px; margin-top: 15px; font-weight: bold; text-align: center; font-size: 13px;}
     </style>
 </head>
@@ -350,10 +358,10 @@
 </div>
 
 <script>
-    /* === JAVASCRIPT: FIREBASE E LÓGICA DO SISTEMA === */
     
     // =========================================================================
-    // ⚠️ PASSO ÚNICO: COLE AS SUAS CHAVES DO FIREBASE ABAIXO! ⚠️
+    // ⚠️ COLE AS SUAS CHAVES DO FIREBASE ABAIXO! ⚠️
+    // ( é o que liga a sua tela ao servidor do Google para ficar 100% online da nuvem magca)
     // =========================================================================
     const firebaseConfig = {
       apiKey: "COLE_AQUI",
@@ -365,65 +373,92 @@
     };
     // =========================================================================
 
+    //  o "start" no motor do Firebase e ativando o Banco de Dados (Firestore)
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // Criando umas gavetinhas na memória do computador para ir somando as quantidades
     let totalNovos = 0, totalRetrabalhados = 0, totalOperacao = 0, totalParceira = 0, totalRetorno = 0;
+    
+    // lista vazia que vai guardar tudo que baixar da nuvem
     let historico = [];
-    let graficoInstancia = null;
-    let idSendoEditado = null; 
+    
+    let graficoInstancia = null; // Guarda o desenho do gráfico
+    let idSendoEditado = null; // Lembra qual pecinha eu cliquei pra editar
 
-    // OUVINTE EM TEMPO REAL
+    // 📡 GRANDE FOFOQUEIRO DA NUVEM (onSnapshot)
+    // fica escutando o Firebase 24 horas por dia. Se a Eduarda lá do PC dela salvar algo, 
+    // ele vê na mesma hora e atualiza a tela de quem tiver com o site aberto.
     db.collection("registros_equipamentos").onSnapshot((snapshot) => {
+        // Zera a conta pra começar a somar tudo de novo fresquinho
         historico = [];
         totalNovos = 0; totalRetrabalhados = 0; totalOperacao = 0; totalParceira = 0; totalRetorno = 0;
 
+        // cada documento/linha que achar na nuvem...
         snapshot.forEach((doc) => {
-            let item = doc.data(); item.id = doc.id; historico.push(item);
+            let item = doc.data(); 
+            item.id = doc.id; // pega o ID unico dele no Firebase
+            historico.push(item); // joga na nossa lista local
+            
+            //  se for produção e for novo, joga na conta de Novos... e por aí vai.
             if (item.tipo === "Produção") {
                 if (item.destino_estado === "Novo") totalNovos += item.quantidade;
                 if (item.destino_estado === "Retrabalhado") totalRetrabalhados += item.quantidade;
             } else if (item.tipo === "Envio") {
                 if (item.destino_estado === "Operação") totalOperacao += item.quantidade;
                 if (item.destino_estado === "Parceira") totalParceira += item.quantidade;
-            } else if (item.tipo === "Retorno de Campo") { totalRetorno += item.quantidade; }
+            } else if (item.tipo === "Retorno de Campo") { 
+                totalRetorno += item.quantidade; 
+            }
         });
 
+        // terminou de contar? atualiza os números da tela pra gente ver!
         atualizarPainel(); atualizarHistorico(); atualizarResumoDiario(); atualizarGrafico();
     });
 
-    // Funções Auxiliares de Data
+    // 📅 FUNÇÕES DE DATA (pra não ficar data americana doida na tela)
     function setarDataDeHoje() {
         let hoje = new Date(); let ano = hoje.getFullYear(); let mes = String(hoje.getMonth() + 1).padStart(2, '0'); let dia = String(hoje.getDate()).padStart(2, '0');
-        let dataISO = `${ano}-${mes}-${dia}`;
+        let dataISO = `${ano}-${mes}-${dia}`; // Formato AAAA-MM-DD
+        // Pega as 3 caixinhas de data do HTML e joga o dia de hoje nelas
         document.getElementById('dataProd').value = dataISO; document.getElementById('dataEnvio').value = dataISO; document.getElementById('dataRetorno').value = dataISO;
     }
     
+    // pega a data AAAA-MM-DD e transforma em DD/MM/AAAA 
     function formatarDataParaSalvar(dataISO) {
         let partes = dataISO.split('-'); let dataBR = `${partes[2]}/${partes[1]}/${partes[0]}`;
+        // se der algum bug com navegador velho, a gente conserta a força, pega o martelo!
         if(dataBR.includes('undefined')) { dataBR = `${new Date(dataISO).toLocaleDateString('pt-BR')}`; }
+        // junta com a hora que a pessoa clicou em "Salvar"
         return `${dataBR}, ${new Date().toLocaleTimeString('pt-BR')}`;
     }
     
+    //  transforma a data bonitinha num numerozão matemático pra gente conseguir ordenar 
     function converterDataParaNumero(dataString) {
         let partes = dataString.split(', '); let dataPartes = partes[0].split('/'); 
         let horaPartes = [0, 0, 0]; if(partes.length > 1) { horaPartes = partes[1].split(':'); } 
         return new Date(dataPartes[2], dataPartes[1] - 1, dataPartes[0], horaPartes[0], horaPartes[1] || 0, horaPartes[2] || 0).getTime();
     }
 
-    // SALVAMENTO NA NUVEM
+    // ☁️ SALVANDO AS COISAS NA NUVEM ☁️
+    
+    // quando o usuário aperta o botão de Salvar na caixa de "Produção"
     document.getElementById('formProducao').addEventListener('submit', function(e) {
-        e.preventDefault(); 
+        e.preventDefault(); // Impede o site de recarregar a tela e perder tudo, oremos 
         let equip = document.getElementById('equipProd').value;
-        let detalhes = coletarTextoDetalhes(equip, 'Prod'); 
-        let obs = document.getElementById('obsProd').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; }
+        let detalhes = coletarTextoDetalhes(equip, 'Prod'); // Vai lá ler se a pessoa digitou lote, cabo, etc.
+        let obs = document.getElementById('obsProd').value; if(obs.trim() !== "") { detalhes += ` | Obs: ${obs}`; } // Se tiver obs, junta no texto
+        
+        // empurra os dados pro Google Firebase (db.collection.add) fazendo a coleta mores
         db.collection("registros_equipamentos").add({ 
             data: formatarDataParaSalvar(document.getElementById('dataProd').value), 
             tipo: "Produção", equipamento: equip, detalhes: detalhes, destino_estado: document.getElementById('estadoProd').value, quantidade: parseInt(document.getElementById('qtdProd').value) 
         });
+        
         alert("Produção Salva!"); this.reset(); document.getElementById('caixaDetalhesProd').classList.add('escondido'); setarDataDeHoje();
     });
 
+    // salvar Envio (A mesmíssima coisa do de cima, só muda a "etiqueta" pro Firebase)
     document.getElementById('formEnvio').addEventListener('submit', function(e) {
         e.preventDefault(); 
         let equip = document.getElementById('equipEnvio').value;
@@ -436,6 +471,7 @@
         alert("Envio Salvo!"); this.reset(); document.getElementById('caixaDetalhesEnvio').classList.add('escondido'); setarDataDeHoje();
     });
 
+    // salvar Retorno
     document.getElementById('formRetorno').addEventListener('submit', function(e) {
         e.preventDefault(); 
         let equip = document.getElementById('equipRetorno').value;
@@ -448,33 +484,49 @@
         alert("Retorno Salvo!"); this.reset(); document.getElementById('caixaDetalhesRetorno').classList.add('escondido'); setarDataDeHoje();
     });
 
-    // APAGAR E EDITAR
+    // 🗑️ APAGAR E EDITAR ✏️
+    
     function desfazerRegistro(idFirebase) { 
+        // pergunta duas vezes se a pessoa não tá doida de apagar algo errado. CALMA, VAMOS TER CALMA!!
         if (!confirm("Tem certeza que deseja APAGAR este registro da Nuvem?")) return;
+        // pega o documento pelo ID dele (idFirebase) e foi de arrasta 
         db.collection("registros_equipamentos").doc(idFirebase).delete(); 
     }
     
     function salvarEdicao() {
+        // Pega o documento pelo ID e manda o comando de UPDATE pro Google
         db.collection("registros_equipamentos").doc(idSendoEditado).update({ 
             quantidade: parseInt(document.getElementById('modalQtd').value), destino_estado: document.getElementById('modalEstadoDestino').value, detalhes: document.getElementById('modalDetalhes').value 
         });
         fecharModalEdicao(); alert("Registro Atualizado!");
     }
 
-    // UI UPDATES
+    // 🖥️ ATUALIZANDO AS TELINHAS PRO USUÁRIO 🖥️
+    
+    // muda o HTML lá do resumão com os totais de tudo
     function atualizarPainel() {
         document.getElementById('totalNovos').innerText = totalNovos; document.getElementById('totalRetrabalhados').innerText = totalRetrabalhados;
         document.getElementById('totalOperacao').innerText = totalOperacao; document.getElementById('totalParceira').innerText = totalParceira; document.getElementById('totalRetorno').innerText = totalRetorno;
     }
     
+    // Pega a lista invisível que puxamos do Firebase e vomita ela em formato de lista (<li>) na tela
     function atualizarHistorico() {
-        const lista = document.getElementById('listaHistorico'); lista.innerHTML = ""; 
+        const lista = document.getElementById('listaHistorico'); lista.innerHTML = ""; // LIMPA LIMPA
+        
+        // pega a data da barrinha de filtro pra ver se a gente precisa ignorar alguma coisa
         let filtro = document.getElementById('filtroDataHistorico').value; let filtroBR = filtro ? `${filtro.split('-')[2]}/${filtro.split('-')[1]}/${filtro.split('-')[0]}` : "";
+        
+        // coloca o mais recente primeiro, ORDEM!
         let ordenado = [...historico].sort((a, b) => converterDataParaNumero(b.data) - converterDataParaNumero(a.data));
         
         ordenado.forEach(item => {
+            // Se o usuário filtrou pro dia 10 e o item é dia 15, pula fora (return) FILTRO
             if (filtroBR && !item.data.startsWith(filtroBR)) return;
+            
+            // cor  da linha de Retorno, r Envio, DProdução DESIGN PURO
             let cor = item.tipo === "Retorno de Campo" ? "#EF4444" : (item.tipo === "Envio" ? "var(--cor-azul-acao)" : "var(--cor-ouro-corporativo)");
+            
+            // desenha o HTML!
             lista.innerHTML += `
                 <li class="historico-item" style="border-left-color: ${cor};">
                     <button class="btn-desfazer" onclick="desfazerRegistro('${item.id}')" title="Apagar">❌</button>
@@ -483,23 +535,28 @@
                     <strong>${item.tipo} (${item.quantidade}x ${item.equipamento}):</strong> ${item.detalhes} -> <em style="color: var(--cor-azul-escuro); font-style: normal; font-weight: bold;">${item.destino_estado}</em>
                 </li>`;
         });
+        // se depois do filtro não sobrar nada na lista
         if (lista.innerHTML === "") lista.innerHTML = `<li class="historico-item" style="text-align: center; color: #94A3B8; border-left: none;">Nenhum registro encontrado nesta data.</li>`;
     }
     
     function limparFiltroHistorico() { document.getElementById('filtroDataHistorico').value = ""; atualizarHistorico(); }
     
+    // clica no lápis: Puxa a janelinha modal, carrega os dados velhos nela pra pessoa arrumar O SUCO DA EDIÇAO
     function abrirModalEdicao(idFirebase) {
         let item = historico.find(i => i.id === idFirebase); if(!item) return; idSendoEditado = idFirebase;
         document.getElementById('modalQtd').value = item.quantidade; document.getElementById('modalDetalhes').value = item.detalhes;
-        let select = document.getElementById('modalEstadoDestino');
+        
+        let select = document.getElementById('modalEstadoDestino'); // Esse select é mutante
         if (item.tipo === "Produção") select.innerHTML = '<option value="Novo">Novo</option><option value="Retrabalhado">Retrabalhado</option>';
         else if (item.tipo === "Envio") select.innerHTML = '<option value="Operação">Operação Interna</option><option value="Parceira">Empresa Parceira</option>';
         else select.innerHTML = '<option value="Defeito">Com Defeito</option><option value="Desativação">Desativação Cliente</option><option value="Manutenção">Preventiva</option><option value="Não especificado">Não informado</option>';
+        
         select.value = item.destino_estado; document.getElementById('modalEdicao').classList.remove('escondido');
     }
     
     function fecharModalEdicao() { document.getElementById('modalEdicao').classList.add('escondido'); idSendoEditado = null; }
     
+    // pega lista local, faz virar texto puro separado por vírgula (.CSV) e manda o navegador do cara fazer o download
     function exportarExcel() {
         if(!confirm("Deseja baixar a planilha com todo o histórico?")) return;
         let csv = "Data,Tipo Movimentação,Equipamento,Quantidade,Estado/Destino/Motivo,Detalhes\n";
@@ -509,25 +566,38 @@
         let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `relatorio_equipamentos_${new Date().toLocaleDateString('pt-BR')}.csv`; link.click();
     }
 
-    // GRÁFICO
+    // 📊 O GRÁFICO (Chart.js fazendo feitiçaria 'uhhhh o fantasminha da prog')
     function atualizarGrafico() {
         let equip = document.getElementById('filtroGrafico').value; let mesesSet = new Set(); 
+        
+        // Pega as datas todas e descobre em quais meses a gente trabalhou (ex: "03/2024")
         historico.forEach(item => { mesesSet.add(item.data.split('/')[1] + '/' + item.data.split('/')[2].split(',')[0]); });
+        //  meses na ordem certa do ano
         let meses = Array.from(mesesSet).sort((a,b) => new Date(a.split('/')[1], a.split('/')[0]-1) - new Date(b.split('/')[1], b.split('/')[0]-1));
-        let dP = [], dE = [], dR = [];
+        
+        let dP = [], dE = [], dR = []; // 3 sacolas vazias pra guardar a conta da Produção, Envio e Retorno
         
         meses.forEach(m => {
             let sP=0, sE=0, sR=0;
-            historico.forEach(i => { if((equip==="TODOS"||i.equipamento===equip) && i.data.includes('/'+m)){ if(i.tipo==="Produção") sP+=i.quantidade; if(i.tipo==="Envio") sE+=i.quantidade; if(i.tipo==="Retorno de Campo") sR+=i.quantidade; }});
-            dP.push(sP); dE.push(sE); dR.push(sR);
+            historico.forEach(i => { 
+                // se a movimentação bate com o mês que tamos conferindo e com o filtro de equipamento... soma!
+                if((equip==="TODOS"||i.equipamento===equip) && i.data.includes('/'+m)){ 
+                    if(i.tipo==="Produção") sP+=i.quantidade; 
+                    if(i.tipo==="Envio") sE+=i.quantidade; 
+                    if(i.tipo==="Retorno de Campo") sR+=i.quantidade; 
+                }
+            });
+            dP.push(sP); dE.push(sE); dR.push(sR); // Joga os resultados somados lá nas 3 sacolas
         });
 
+        // "apaga" a lousa antiga se já tinha um gráfico desenhado
         const ctx = document.getElementById('meuGraficoCanvas').getContext('2d');
         if (graficoInstancia) graficoInstancia.destroy();
         
         Chart.defaults.color = '#64748B';
         Chart.defaults.font.family = 'Inter';
 
+        // pede pra biblioteca desenhar o gráfico com os meses no eixo X e as 3 sacolas no eixo Y
         graficoInstancia = new Chart(ctx, { 
             type: 'bar', 
             data: { labels: meses, datasets: [
@@ -539,13 +609,19 @@
         });
     }
 
-    // RESUMOS E PESQUISA
+    // 📋 RESUMOS E PESQUISA EXTRA
+    
+    //  bloquinho que agrupa os números de hoje, ontem, etc.
     function atualizarResumoDiario() {
         const div = document.getElementById('caixaResumoDiario'); div.innerHTML = ""; let res = {};
+        
+        // Empacotando e somando os dados por dia (res["23/04/2024"]["ET"]["Novos"])
         historico.forEach(i => { if(i.tipo==="Produção"){ let dBR=i.data.split(',')[0]; if(!res[dBR])res[dBR]={}; if(!res[dBR][i.equipamento])res[dBR][i.equipamento]={N:0,R:0}; if(i.destino_estado==="Novo")res[dBR][i.equipamento].N+=i.quantidade; else res[dBR][i.equipamento].R+=i.quantidade; }});
+        
         let dias = Object.keys(res).sort((a,b) => converterDataParaNumero(b+', 00:00:00') - converterDataParaNumero(a+', 00:00:00'));
         if (dias.length === 0) { div.innerHTML = `<p style="text-align: center; color: #94A3B8; padding: 15px;">Nenhuma produção registrada ainda.</p>`; return; }
         
+        // desempacotando e imprimindo na tela
         dias.forEach(d => {
             let h = `<div class="dia-resumo"><h4>Resumo de Produção em ${d}</h4><ul>`;
             Object.keys(res[d]).sort().forEach(e => { h += `<li><strong>${e}:</strong> ${res[d][e].N} Novos | ${res[d][e].R} Retr.</li>`; });
@@ -553,10 +629,11 @@
         });
     }
     
+    // botão "Gerar Relatório em Tela" (Faz quase a mesma coisa que o Painel Geral, mas com base num mês específico)
     function realizarPesquisa() {
         let m = document.getElementById('filtroMes').value; let e = document.getElementById('filtroEquip').value;
         let mF = m ? `/${m.split('-')[1]}/${m.split('-')[0]}` : "";
-        let s = {n:0,r:0,o:0,p:0,ret:0};
+        let s = {n:0,r:0,o:0,p:0,ret:0}; // Sacola de somas provisórias
         
         historico.forEach(i => { if((e==="TODOS"||i.equipamento===e) && (mF===""||i.data.includes(mF))){ if(i.tipo==="Produção"){ if(i.destino_estado==="Novo")s.n+=i.quantidade; else s.r+=i.quantidade;} else if(i.tipo==="Envio"){ if(i.destino_estado==="Operação")s.o+=i.quantidade; else s.p+=i.quantidade;} else s.ret+=i.quantidade; }});
         
@@ -571,16 +648,20 @@
                 <hr style="border:0;border-top:1px solid #E2E8F0; margin:10px 0;">
                 <li>📥 <strong>Total Retorno de Campo:</strong> ${s.ret}</li>
             </ul>`;
-        document.getElementById('resultadoPesquisa').classList.remove('escondido');
+        document.getElementById('resultadoPesquisa').classList.remove('escondido'); // Tira a capa da invisibilidade!
     }
 
-    // LÓGICA DE DETALHES DINÂMICOS
+    // 🔧 LÓGICA DE DETALHES DINÂMICOS (ET tem Lote, Antena tem Cabo...) 🔧
+    
+    // confere se o abençoado do modem 800C foi selecionado e liga o pisca alerta vermelho na tela
     function verificarModemET(sObj, suf) { let a = document.getElementById('avisoModem_'+suf); if(a) { if(sObj.value==="Modem 800C (ANTIGO)" && suf==="Retorno") a.classList.remove('escondido'); else a.classList.add('escondido'); } }
     
+    // Essa é a mágica de fazer os campos aparecerem só quando escolhe a peça certa no menu
     function gerarCampos(e, suf) {
         let c = document.getElementById('caixaDetalhes'+suf); let htmlExtra = "";
         
         if(e==="ET") { 
+            // bota o formulário da ET (Lote, Caixa, Versão...)
             htmlExtra = `
                 <div class="painel-grid" style="grid-template-columns: 1fr 1fr;">
                     <div><label>Modelo:</label><select id="modelo_${suf}"><option>ANATEL (Branco)</option><option>Antigo (Preto)</option></select></div>
@@ -596,22 +677,25 @@
         }
         else if(e==="SENSORES") htmlExtra = `<div class="painel-grid" style="grid-template-columns: 1fr 1fr;"><div><label>Tipo (Ex: SS):</label><input type="text" id="tipo_${suf}" placeholder="Ex: SS" style="text-transform:uppercase;"></div><div><label>Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select></div></div>`;
         else if(e==="ANTENAS") htmlExtra = `<label>Tamanho do Cabo:</label><select id="cabo_${suf}"><option>Tamanho Padrão</option><option>Tamanho Especial</option></select>`;
-        else if(e==="RT") htmlExtra = `<p style="font-size:13px;color:#64748B;">Sem detalhes adicionais configuráveis.</p>`;
+        else if(e==="RT") htmlExtra = `<p style="font-size:13px;color:#64748B;">Sem detalhes adicionais configuráveis.</p>`; // RT não enche o saco
         else if(e==="CT") htmlExtra = `<label>Modem:</label><select id="modem_${suf}"><option>Modem A767X</option><option>Modem 7080G</option></select>`;
         else if(e==="MB") htmlExtra = `<label>Hardware Origem:</label><select id="origem_${suf}"><option>China Hardware</option><option>Aqua Hardware</option></select>`;
         
+        // joga as caixinhas na tela. E se for Vazio "", ele volta a ficar invisível.
         c.innerHTML = htmlExtra; c.classList.toggle('escondido', htmlExtra===""); if(suf==='Prod') aplicarRegrasET();
     }
     
+    // se a ET for Nova, a versão TEM que ser a última
     function aplicarRegrasET() { if(document.getElementById('equipProd').value==="ET" && document.getElementById('estadoProd').value==="Novo" && document.getElementById('versao_Prod')) { document.getElementById('versao_Prod').value="V1R12"; document.getElementById('modem_Prod').value="Modem A767X"; }}
     
+    // passa a vassoura em todas as caixinhas de detalhes pra juntar numa frase só e mandar pro Google de uma vez
     function coletarTextoDetalhes(e, suf) {
         if(e==="ET") return `Mod: ${document.getElementById('modelo_'+suf).value}, Lote: ${document.getElementById('lote_'+suf).value}, Caixa: ${document.getElementById('caixa_'+suf).value}, Ver: ${document.getElementById('versao_'+suf).value}, Modem: ${document.getElementById('modem_'+suf).value}${ (document.getElementById('modem_'+suf).value === 'Modem 800C (ANTIGO)' && suf==='Retorno') ? ' 🔴 TROCAR MODEM OBRIGATÓRIO' : '' }`;
         if(e==="SENSORES") return `Tipo: ${document.getElementById('tipo_'+suf).value.toUpperCase()}, Cabo: ${document.getElementById('cabo_'+suf).value}`;
         return "Detalhes padrão.";
     }
 
-    // Inicialização
+    //  tela carregou, ele puxa o calendário pro dia de hoje
     setarDataDeHoje();
 
 </script>
